@@ -147,8 +147,6 @@
                     <span class="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-blue-600"></span>
                 </a>
                 <a href="#tentang" class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Tentang</a>
-                <a href="#jenjang-section" class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Alur
-                    Belajar</a>
                 <a href="#bantuan" class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Bantuan</a>
             </div>
 
@@ -165,16 +163,17 @@
                         <span>{{ Auth::user()->name }}</span>
                     </a>
                 @else
-                    <a href="{{ Route::has('login') ? route('login') : '#onboarding-modal' }}"
-                        onclick="{{ Route::has('login') ? '' : 'openOnboardingModal(); return false;' }}"
-                        class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-soft-blue hover:-translate-y-0.5 transition-all duration-200">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <span>Masuk</span>
-                    </a>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ url('/auth') }}"
+                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-soft-blue hover:-translate-y-0.5 transition-all duration-200">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            <span>Masuk</span>
+                        </a>
+                    </div>
                 @endauth
             </div>
         </nav>
@@ -378,66 +377,6 @@
             </div>
         </div>
     </section>
-
-    <!-- =====================================================================
-         MODAL SMART ONBOARDING ("BARU DI PEMROGRAMAN?")
-    ====================================================================== -->
-    <div id="onboarding-modal"
-        class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-        <div
-            class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-bold">
-                    Mulai Petualanganmu
-                </span>
-                <button type="button" onclick="closeOnboardingModal()"
-                    class="text-slate-400 hover:text-slate-600 p-1 rounded-lg cursor-pointer">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-            </div>
-
-            <h3 class="text-xl sm:text-2xl font-extrabold text-slate-900">Baru di dunia pemrograman?</h3>
-            <p class="text-sm text-slate-600 mt-2 leading-relaxed">
-                Kami akan menyesuaikan titik mulai belajarmu. Tidak perlu daftar akun sekarang—progresmu otomatis
-                tersimpan!
-            </p>
-
-            <div class="mt-6 space-y-3">
-                <!-- Pilihan 1: Baru belajar -> Langsung ke Level SD -->
-                <a href="{{ url('/learn/sd') }}"
-                    class="flex items-center justify-between w-full p-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white shadow-soft-blue transition-all group">
-                    <div>
-                        <span class="block font-bold text-base">Ya, saya baru mulai!</span>
-                        <span class="block text-xs text-blue-100 mt-0.5">Mulai dari Jenjang SD (Pengenalan Python, C++,
-                            Java)</span>
-                    </div>
-                    <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </a>
-
-                <!-- Pilihan 2: Sudah pernah belajar -> Pilih Jenjang -->
-                <button type="button"
-                    onclick="closeOnboardingModal(); document.getElementById('jenjang-section').scrollIntoView({behavior: 'smooth'});"
-                    class="flex items-center justify-between w-full p-4 rounded-2xl bg-slate-50 hover:bg-blue-50/70 border border-slate-200 hover:border-blue-300 text-left transition-all group cursor-pointer">
-                    <div>
-                        <span class="block font-bold text-slate-800 group-hover:text-blue-700 text-base">Sudah pernah
-                            belajar dasar</span>
-                        <span class="block text-xs text-slate-500 mt-0.5">Pilih langsung ke Jenjang SMP atau SMA</span>
-                    </div>
-                    <svg class="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all shrink-0"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- =====================================================================
          VANILLA JS: MODAL & DETEKSI PROGRES GUEST (LOCALSTORAGE)

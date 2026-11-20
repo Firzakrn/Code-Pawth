@@ -19,4 +19,4 @@ Route::get('/', function () {
 Route::get('level-view', function () {
     return view('level-view');
 })->name('level-view');
-
+Route::view('/auth', 'auth')->name('auth');
