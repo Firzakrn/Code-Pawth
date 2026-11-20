@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('level-view', function () {
+    return view('level-view');
+})->name('level-view');
+
