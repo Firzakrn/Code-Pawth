@@ -20,3 +20,10 @@ Route::get('level-view', function () {
     return view('level-view');
 })->name('level-view');
 Route::view('/auth', 'auth')->name('auth');
+Route::view('/materi/flashcard', 'materi.flashcard')->name('materi.flashcard');
+Route::view('/materi/evaluasi', 'materi.evaluasi')->name('materi.evaluasi');
+Route::view('/materi/flowchart', 'materi.flowchart')->name('materi.flowchart');
+Route::view('/materi/code', 'materi.code')->name('materi.code');
+Route::view('/materi/exam', 'materi.exam')->name('materi.exam');
+
+
