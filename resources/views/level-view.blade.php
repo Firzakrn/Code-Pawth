@@ -141,7 +141,8 @@
                 class="bg-white/95 backdrop-blur-xs rounded-2xl border border-white shadow-soft-card px-4 py-2.5 flex items-center gap-3.5 max-w-md z-10">
                 <div
                     class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="{{ asset('images/mascot_peek.png') }}" alt="Avatar Jenjang" class="w-10 h-10 object-contain">
+                    <img src="{{ asset('images/mascot_class.png') }}" alt="Avatar Jenjang"
+                        class="w-10 h-10 object-contain">
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center gap-2">
@@ -168,8 +169,8 @@
                     class="bg-white/95 px-3.5 py-2 rounded-2xl rounded-br-xs shadow-soft-card border border-blue-100 text-xs sm:text-sm font-bold text-slate-700">
                     Ayo selesaikan semua levelnya! <span class="text-amber-400">★</span>
                 </div>
-                <img src="{{ asset('images/mascot_peek.png') }}" alt="Maskot Penyemangat"
-                    class="w-20 h-16 object-contain object-bottom drop-shadow-xs">
+                <img src="{{ asset('images/mascot_cheers.png') }}" alt="Maskot Penyemangat"
+                    class="w-28 h-24 object-contain object-bottom drop-shadow-xs">
             </div>
         </div>
 
@@ -359,8 +360,8 @@
     </main>
 
     <!-- =====================================================================
-                     SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
-                ====================================================================== -->
+                                                                         SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
+                                                                    ====================================================================== -->
     <div id="drawer-backdrop" onclick="closeLevelDrawer()"
         class="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-40 hidden opacity-0 transition-opacity duration-300">
     </div>
@@ -394,7 +395,7 @@
             <!-- Header Materi + Maskot -->
             <div
                 class="flex items-start gap-4 bg-gradient-to-r from-blue-50/90 to-indigo-50/60 p-4 rounded-2xl border border-blue-100">
-                <img src="{{ asset('images/mascot_peek.png') }}" alt="Maskot Level"
+                <img src="{{ asset('images/mascot_what.png') }}" alt="Maskot Level"
                     class="w-14 h-14 object-contain shrink-0">
                 <div>
                     <span id="drawer-language-tag"
@@ -489,7 +490,7 @@
                         progress: 100,
                         cardsDone: '5 / 5 Kartu',
                         adaptiveNote: 'Tuntas tanpa remedial! Semua konsep dasar Python dikuasai.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 2,
@@ -507,7 +508,7 @@
                         progress: 40,
                         cardsDone: '2 / 5 Kartu',
                         adaptiveNote: 'Sedang dipelajari. Selesaikan kartu evaluasi dengan nilai minimal 80.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 3,
@@ -525,7 +526,7 @@
                         progress: 0,
                         cardsDone: '0 / 5 Kartu',
                         adaptiveNote: 'Terkunci. Raih nilai minimal 80% di Level 2 untuk membuka tahap C++.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 4,
@@ -543,7 +544,7 @@
                         progress: 0,
                         cardsDone: '0 / 5 Kartu',
                         adaptiveNote: 'Terkunci. Selesaikan Level 3 terlebih dahulu.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 5,
@@ -561,7 +562,7 @@
                         progress: 0,
                         cardsDone: '0 / 6 Tantangan',
                         adaptiveNote: 'Pilihan bahasa favoritmu di level ini akan mengatur contoh kode di jenjang SMA.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     }
                 ]
             },
@@ -583,7 +584,7 @@
                         progress: 20,
                         cardsDone: '1 / 5 Kartu',
                         adaptiveNote: 'Raih nilai minimal 80% untuk membuka tantangan flowchart rumpang.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 2,
@@ -601,7 +602,7 @@
                         progress: 0,
                         cardsDone: '0 / 4 Kasus',
                         adaptiveNote: 'Terkunci. Selesaikan Level 1 SMP terlebih dahulu.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 3,
@@ -619,7 +620,7 @@
                         progress: 0,
                         cardsDone: '0 / 3 Misi',
                         adaptiveNote: 'Terkunci. Selesaikan Level 2 SMP terlebih dahulu.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 4,
@@ -637,7 +638,7 @@
                         progress: 0,
                         cardsDone: '0 / 5 Soal',
                         adaptiveNote: 'Syarat lulus minimal nilai 75%.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     }
                 ]
             },
@@ -659,7 +660,7 @@
                         progress: 0,
                         cardsDone: '0 / 5 Kartu',
                         adaptiveNote: 'Contoh kode menyesuaikan bahasa favoritmu.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 2,
@@ -677,7 +678,7 @@
                         progress: 0,
                         cardsDone: '0 / 3 Tantangan',
                         adaptiveNote: 'Terkunci. Selesaikan Level 1 SMA terlebih dahulu.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/flashcard') }}'
                     },
                     {
                         id: 3,
@@ -695,7 +696,7 @@
                         progress: 0,
                         cardsDone: '0 / 5 Tantangan',
                         adaptiveNote: 'Syarat lulus minimal nilai 75%.',
-                        url: '{{ url('/materi') }}'
+                        url: '{{ url('/materi/exam') }}'
                     }
                 ]
             }
@@ -864,29 +865,30 @@
                 nodeEl.innerHTML = `
                 <!-- PENANDA POSISI SEKARANG: mascot_peek.png DI ATAS BULATAN -->
                 ${isMascotHere ? `
-                                <div class="absolute -top-[62px] sm:-top-[70px] left-1/2 -translate-x-1/2 z-20 pointer-events-none animate-peek-top flex flex-col items-center">
-                                    <div class="flex items-center gap-0.5 mb-0.5">
-                                        ${[1, 2, 3].map(s => `
-                                <svg class="w-3 h-3 ${s <= lvl.stars ? 'text-amber-400' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
-                                </svg>
-                            `).join('')}
-                                    </div>
-                                    <img 
-                                        src="{{ asset('images/mascot_peek.png') }}" 
-                                        alt="Posisi Maskot Sekarang" 
-                                        class="w-14 h-12 sm:w-16 sm:h-14 object-contain object-bottom drop-shadow-sm"
-                                    >
-                                </div>
-                            ` : `
-                                <div class="mb-1 flex items-center gap-0.5">
-                                    ${[1, 2, 3].map(s => `
+                    <div class="absolute bottom-[86%] left-1/2 -translate-x-1/2 w-max z-20 pointer-events-none animate-peek-top flex flex-col items-center">
+                        <div class="flex items-center gap-0.5 -mb-1">
+                            ${[1, 2, 3].map(s => `
+                <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
+                </svg>
+            `).join('')}
+                        </div>
+                        <img 
+                            src="{{ asset('images/mascot_peek.png') }}" 
+                            alt="Posisi Maskot Sekarang" 
+                            style="width: 95px; height: 75px;"
+                            class="shrink-0 object-contain object-bottom drop-shadow-sm"
+                        >
+                    </div>
+                ` : `
+                                                                                    <div class="mb-1 flex items-center gap-0.5">
+                                                                                        ${[1, 2, 3].map(s => `
                             <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
                             </svg>
                         `).join('')}
-                                </div>
-                            `}
+                                                                                    </div>
+                                                                                `}
 
                 <!-- BULATAN PEDESTAL 3D DENGAN ANGKA LEVEL DI DALAMNYA -->
                 <div class="relative ${circleSizeClass} rounded-full ${pedestalClass} p-1.5 flex items-center justify-center transition-all ${isMascotHere ? 'ring-4 ring-blue-300/70' : ''}">
@@ -897,20 +899,20 @@
                     </div>
 
                     ${isDone ? `
-                                    <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                    </span>
-                                ` : ''}
+                                                                                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                                                            </svg>
+                                                                                        </span>
+                                                                                    ` : ''}
 
                     ${isLocked ? `
-                                    <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
-                                        </svg>
-                                    </span>
-                                ` : ''}
+                                                                                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                                                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                                                                                <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
+                                                                                            </svg>
+                                                                                        </span>
+                                                                                    ` : ''}
                 </div>
             `;
 

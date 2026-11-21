@@ -198,8 +198,8 @@
                     <rect x="0" y="145" width="260" height="35" fill="#FFFFFF" />
                 </svg>
 
-                <img src="{{ asset('images/mascot_peek.png') }}" alt="Maskot Code Pawth"
-                    class="relative z-10 w-20 h-20 object-contain -mb-1.5 drop-shadow-xs">
+                <img src="{{ asset('images/mascot_loveya.png') }}" alt="Maskot Code Pawth"
+                    class="relative z-10 w-24 h-24 object-contain -mb-1.5 drop-shadow-xs">
 
                 <div
                     class="relative z-10 bg-white/95 rounded-full px-4 py-2 shadow-sm border border-blue-100/80 text-center">
@@ -214,7 +214,7 @@
             <div id="sidebar-footer-collapsed" class="hidden flex-col items-center justify-center pb-4 px-2">
                 <div class="w-12 h-12 rounded-2xl bg-gradient-to-b from-blue-50 to-blue-100/80 border border-blue-200/70 flex items-center justify-center p-1 shadow-2xs"
                     title="Semangat belajar, Future Coder!">
-                    <img src="{{ asset('images/mascot_peek.png') }}" alt="Maskot Mini"
+                    <img src="{{ asset('images/mascot_loveya.png') }}" alt="Maskot Mini"
                         class="w-10 h-10 object-contain">
                 </div>
             </div>

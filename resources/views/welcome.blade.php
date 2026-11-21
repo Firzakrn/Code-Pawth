@@ -324,7 +324,7 @@
                 </a>
 
                 <!-- Jenjang SMP -->
-                <a href="{{ url('/learn/smp') }}"
+                <a href="{{ url('level-view') }}"
                     class="group flex items-center justify-between px-4 sm:px-5 py-3 rounded-xl bg-slate-50/80 hover:bg-blue-50/90 border border-slate-200/80 hover:border-blue-300 transition-all duration-200">
                     <div class="flex items-center gap-3">
                         <div
@@ -350,7 +350,7 @@
                 </a>
 
                 <!-- Jenjang SMA -->
-                <a href="{{ url('/learn/sma') }}"
+                <a href="{{ url('level-view') }}"
                     class="group flex items-center justify-between px-4 sm:px-5 py-3 rounded-xl bg-slate-50/80 hover:bg-blue-50/90 border border-slate-200/80 hover:border-blue-300 transition-all duration-200">
                     <div class="flex items-center gap-3">
                         <div
