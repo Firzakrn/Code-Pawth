@@ -4,12 +4,19 @@
     $jenjangParam = strtoupper(request('jenjang', 'SD'));
     $levelParam = (int) request('level', 1);
 
-    // Boolean flowchart: baca dari ?flowchart=1/0, atau otomatis true untuk SMP
+    $isAdvancedJenjang = in_array($jenjangParam, ['SMP', 'SMA']);
+
     $hasFlowchart = request()->has('flowchart')
         ? filter_var(request('flowchart'), FILTER_VALIDATE_BOOLEAN)
-        : $jenjangParam === 'SMP';
+        : $isAdvancedJenjang;
 
-    $materiQuery = "jenjang={$jenjangParam}&level={$levelParam}&flowchart=" . ($hasFlowchart ? '1' : '0');
+    $hasCoding = request()->has('coding') ? filter_var(request('coding'), FILTER_VALIDATE_BOOLEAN) : $isAdvancedJenjang;
+
+    $materiQuery =
+        "jenjang={$jenjangParam}&level={$levelParam}&flowchart=" .
+        ($hasFlowchart ? '1' : '0') .
+        '&coding=' .
+        ($hasCoding ? '1' : '0');
     $currentStep = trim($__env->yieldContent('materi_step', 'flashcard'));
 
     // =========================================================================
@@ -249,6 +256,83 @@
                 ],
             ],
         ],
+        'SMA-1' => [
+            'levelTitle' => 'Algoritma & Percabangan Python',
+            'items' => [
+                [
+                    'id' => 201,
+                    'pair_id' => 201,
+                    'kategori' => 'front',
+                    'judul' => 'Konversi Tipe Input',
+                    'main_materi' => 'Mengubah teks masukan pengguna menjadi bilangan bulat',
+                    'isi_materi' => 'int(input())',
+                    'iconKey' => 'keyboard',
+                ],
+                [
+                    'id' => 202,
+                    'pair_id' => 201,
+                    'kategori' => 'back',
+                    'judul' => 'Fungsi Konversi',
+                    'main_materi' => 'Diperlukan sebelum melakukan operasi aritmatika atau perbandingan angka',
+                    'isi_materi' => 'Membaca input angka bilangan bulat',
+                    'iconKey' => 'keyboard',
+                ],
+                [
+                    'id' => 203,
+                    'pair_id' => 202,
+                    'kategori' => 'front',
+                    'judul' => 'Operator Modulus',
+                    'main_materi' => 'Menghitung sisa hasil pembagian dua bilangan',
+                    'isi_materi' => 'Operator %',
+                    'iconKey' => 'number',
+                ],
+                [
+                    'id' => 204,
+                    'pair_id' => 202,
+                    'kategori' => 'back',
+                    'judul' => 'Fungsi Modulus',
+                    'main_materi' => 'Contoh: 8 % 2 menghasilkan 0 (habis dibagi)',
+                    'isi_materi' => 'Mencari sisa pembagian bilangan',
+                    'iconKey' => 'number',
+                ],
+                [
+                    'id' => 205,
+                    'pair_id' => 203,
+                    'kategori' => 'front',
+                    'judul' => 'Percabangan Bersyarat',
+                    'main_materi' => 'Struktur pemilihan jalur kode jika kondisi bernilai True',
+                    'isi_materi' => 'if ... else:',
+                    'iconKey' => 'branch',
+                ],
+                [
+                    'id' => 206,
+                    'pair_id' => 203,
+                    'kategori' => 'back',
+                    'judul' => 'Fungsi Percabangan',
+                    'main_materi' => 'Menerjemahkan simbol belah ketupat pada flowchart ke Python',
+                    'isi_materi' => 'Menjalankan blok kode sesuai kondisi logika',
+                    'iconKey' => 'branch',
+                ],
+                [
+                    'id' => 207,
+                    'pair_id' => 204,
+                    'kategori' => 'front',
+                    'judul' => 'Aturan Indentasi',
+                    'main_materi' => 'Spasi menjorok ke dalam setelah tanda titik dua (:)',
+                    'isi_materi' => 'Indentasi (4 Spasi)',
+                    'iconKey' => 'note',
+                ],
+                [
+                    'id' => 208,
+                    'pair_id' => 204,
+                    'kategori' => 'back',
+                    'judul' => 'Fungsi Indentasi',
+                    'main_materi' => 'Menandakan baris kode berada di dalam blok if atau else',
+                    'isi_materi' => 'Menentukan cakupan blok perintah Python',
+                    'iconKey' => 'note',
+                ],
+            ],
+        ],
     ];
 
     $deckKey = "{$jenjangParam}-{$levelParam}";
@@ -399,7 +483,7 @@
                                 </svg>
                                 <span>Flowchart</span>
                             </div>
-                        @elseif($currentStep === 'evaluasi')
+                        @elseif(in_array($currentStep, ['coding', 'evaluasi']))
                             <a href="{{ url('/materi/flowchart') }}?{{ $materiQuery }}"
                                 class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
                                 <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
@@ -427,7 +511,47 @@
                         @endif
                     @endif
 
-                    <!-- TAB 3: EVALUASI -->
+                    <!-- TAB 3: CODING PYTHON (Muncul setelah Flowchart untuk SMP & SMA) -->
+                    @if ($hasCoding ?? $hasFlowchart)
+                        @if ($currentStep === 'coding')
+                            <div
+                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                </svg>
+                                <span>Coding</span>
+                            </div>
+                        @elseif($currentStep === 'evaluasi')
+                            <a href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
+                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
+                                <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span>Coding</span>
+                            </a>
+                        @else
+                            <a id="nav-tab-coding" href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
+                                data-locked="true"
+                                onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
+                                title="Selesaikan Flowchart terlebih dahulu"
+                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
+                                <span id="nav-tab-coding-icon" class="inline-flex items-center">
+                                    <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span>Coding</span>
+                            </a>
+                        @endif
+                    @endif
+
+                    <!-- TAB 4: EVALUASI -->
                     @if ($currentStep === 'evaluasi')
                         <div
                             class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
@@ -440,7 +564,7 @@
                     @else
                         <a id="nav-tab-evaluasi" href="{{ url('/materi/evaluasi') }}?{{ $materiQuery }}"
                             data-locked="true" onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
-                            title="{{ $hasFlowchart ? 'Selesaikan Flowchart terlebih dahulu' : 'Selesaikan semua kartu Flashcard terlebih dahulu' }}"
+                            title="{{ $hasFlowchart ? 'Selesaikan Coding terlebih dahulu' : 'Selesaikan semua kartu Flashcard terlebih dahulu' }}"
                             class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
                             <span id="nav-tab-evaluasi-icon" class="inline-flex items-center">
                                 <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
@@ -454,7 +578,6 @@
                     @endif
 
                 </div>
-
                 <div class="hidden sm:flex items-center gap-2.5 pb-1.5">
                     @yield('materi_tab_right')
                 </div>
@@ -469,8 +592,8 @@
     </main>
 
     <!-- =========================================================================
-                     INISIALISASI GLOBAL CONTEXT, DATA & TOGGLE HEADER
-                ========================================================================== -->
+                                         INISIALISASI GLOBAL CONTEXT, DATA & TOGGLE HEADER
+                                    ========================================================================== -->
     <script>
         window.MATERI_CTX = {
             jenjang: @json($jenjangParam),
@@ -583,4 +706,12 @@
             window.applyMateriHeaderState(savedHidden);
         });
     </script>
+    <script>
+        window.MATERI_CTX = Object.assign(window.MATERI_CTX || {}, {
+            catalog: @json($materiCatalog)
+        });
+    </script>
+
+    @include('additional')
+    @stack('scripts')
 @endsection

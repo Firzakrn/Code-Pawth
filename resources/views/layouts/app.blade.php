@@ -41,6 +41,7 @@
 </head>
 
 <body class="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row relative">
+    @include('additional')
 
     <!-- =====================================================================
          SIDEBAR NAVIGASI (TERINTEGRASI LANGSUNG DI LAYOUT)
@@ -168,7 +169,7 @@
                 </a>
 
                 <!-- 4. Bantuan -->
-                <a href="{{ url('/bantuan') }}" data-nav-path="/bantuan" title="Bantuan"
+                <button type="button" onclick="openAdditionalDrawer('bantuan')" title="Bantuan"
                     class="sidebar-nav-item flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-slate-600 hover:bg-slate-50 hover:text-blue-600 transition-colors">
                     <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                         <path fill-rule="evenodd"
@@ -176,7 +177,7 @@
                             clip-rule="evenodd" />
                     </svg>
                     <span class="sidebar-label truncate">Bantuan</span>
-                </a>
+                    </a>
             </nav>
         </div>
 

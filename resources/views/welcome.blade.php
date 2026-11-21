@@ -56,7 +56,7 @@
 
 <body
     class="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col justify-between relative selection:bg-blue-600 selection:text-white">
-
+    @include('additional')
     <!-- =====================================================================
          DEKORASI BACKGROUND (SVG BLOB AWAN, SPARKLES & DOTS)
     ====================================================================== -->
@@ -146,8 +146,10 @@
                     <span class="sr-only">Beranda</span>
                     <span class="absolute bottom-0 left-0 right-0 h-[3px] rounded-full bg-blue-600"></span>
                 </a>
-                <a href="#tentang" class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Tentang</a>
-                <a href="#bantuan" class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Bantuan</a>
+                <button type="button" onclick="openAdditionalDrawer('tentang')"
+                    class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Tentang</button>
+                <button type="button" onclick="openAdditionalDrawer('bantuan')"
+                    class="py-2 text-slate-600 hover:text-blue-600 transition-colors">Bantuan</button>
             </div>
 
             <!-- Tombol Masuk -->

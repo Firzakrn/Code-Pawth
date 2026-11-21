@@ -25,5 +25,8 @@ Route::view('/materi/evaluasi', 'materi.evaluasi')->name('materi.evaluasi');
 Route::view('/materi/flowchart', 'materi.flowchart')->name('materi.flowchart');
 Route::view('/materi/code', 'materi.code')->name('materi.code');
 Route::view('/materi/exam', 'materi.exam')->name('materi.exam');
+Route::view('/materi/coding', 'materi.coding');
+Route::view('/knowledge-card', 'knowledge-card')->name('knowledge-card');
+Route::view('/pengaturan', 'pengaturan')->name('pengaturan');
 
 

@@ -297,7 +297,7 @@
                 const iconHtml = evalSvgIcons[iconKey] || evalSvgIcons.default;
 
                 let borderStyle =
-                'border-dashed border-blue-200 bg-white hover:border-blue-400 hover:bg-blue-50/40';
+                    'border-dashed border-blue-200 bg-white hover:border-blue-400 hover:bg-blue-50/40';
                 if (isChecked && isMatched) {
                     borderStyle = result ?
                         'border-solid border-emerald-400 bg-emerald-50/80' :
@@ -477,7 +477,7 @@
                     'Semua tahapan belajar selesai! Level berikutnya di peta belajar sudah terbuka.';
                 if (mascotSpeech) mascotSpeech.textContent = 'Hebat! Kamu lulus evaluasi level ini!';
             } else {
-                if (modalMascotImg) modalMascotImg.src = "{{ asset('images/mascot_sad.png') }}";
+                if (modalMascotImg) modalMascotImg.src = "{{ asset('images/mascot_angry.png') }}";
                 document.getElementById('modal-result-title').textContent = isTimeout ? 'Waktu Habis!' : 'Hampir Berhasil!';
                 document.getElementById('modal-result-desc').textContent =
                     'Raih skor minimal 80 untuk membuka level berikutnya. Yuk coba cocokkan lagi!';
