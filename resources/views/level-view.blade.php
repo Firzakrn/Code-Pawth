@@ -118,7 +118,7 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                 Mode Tamu Aktif
             </span>
-            <a href="{{ url('/') }}"
+            <a href="{{ url('auth') }}"
                 class="inline-flex items-center gap-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200/80 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-2xs transition-colors">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd"
@@ -360,8 +360,8 @@
     </main>
 
     <!-- =====================================================================
-                                                                         SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
-                                                                    ====================================================================== -->
+                                                                             SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
+                                                                        ====================================================================== -->
     <div id="drawer-backdrop" onclick="closeLevelDrawer()"
         class="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-40 hidden opacity-0 transition-opacity duration-300">
     </div>
@@ -865,30 +865,30 @@
                 nodeEl.innerHTML = `
                 <!-- PENANDA POSISI SEKARANG: mascot_peek.png DI ATAS BULATAN -->
                 ${isMascotHere ? `
-                    <div class="absolute bottom-[86%] left-1/2 -translate-x-1/2 w-max z-20 pointer-events-none animate-peek-top flex flex-col items-center">
-                        <div class="flex items-center gap-0.5 -mb-1">
-                            ${[1, 2, 3].map(s => `
+                        <div class="absolute bottom-[86%] left-1/2 -translate-x-1/2 w-max z-20 pointer-events-none animate-peek-top flex flex-col items-center">
+                            <div class="flex items-center gap-0.5 -mb-1">
+                                ${[1, 2, 3].map(s => `
                 <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
                     <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
                 </svg>
             `).join('')}
+                            </div>
+                            <img 
+                                src="{{ asset('images/mascot_peek.png') }}" 
+                                alt="Posisi Maskot Sekarang" 
+                                style="width: 95px; height: 75px;"
+                                class="shrink-0 object-contain object-bottom drop-shadow-sm"
+                            >
                         </div>
-                        <img 
-                            src="{{ asset('images/mascot_peek.png') }}" 
-                            alt="Posisi Maskot Sekarang" 
-                            style="width: 95px; height: 75px;"
-                            class="shrink-0 object-contain object-bottom drop-shadow-sm"
-                        >
-                    </div>
-                ` : `
-                                                                                    <div class="mb-1 flex items-center gap-0.5">
-                                                                                        ${[1, 2, 3].map(s => `
+                    ` : `
+                                                                                        <div class="mb-1 flex items-center gap-0.5">
+                                                                                            ${[1, 2, 3].map(s => `
                             <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
                             </svg>
                         `).join('')}
-                                                                                    </div>
-                                                                                `}
+                                                                                        </div>
+                                                                                    `}
 
                 <!-- BULATAN PEDESTAL 3D DENGAN ANGKA LEVEL DI DALAMNYA -->
                 <div class="relative ${circleSizeClass} rounded-full ${pedestalClass} p-1.5 flex items-center justify-center transition-all ${isMascotHere ? 'ring-4 ring-blue-300/70' : ''}">
@@ -899,20 +899,20 @@
                     </div>
 
                     ${isDone ? `
-                                                                                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                                                                            </svg>
-                                                                                        </span>
-                                                                                    ` : ''}
+                                                                                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                                                                </svg>
+                                                                                            </span>
+                                                                                        ` : ''}
 
                     ${isLocked ? `
-                                                                                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                                                                            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                                                                                                <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
-                                                                                            </svg>
-                                                                                        </span>
-                                                                                    ` : ''}
+                                                                                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                                                                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                                                                                    <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
+                                                                                                </svg>
+                                                                                            </span>
+                                                                                        ` : ''}
                 </div>
             `;
 
