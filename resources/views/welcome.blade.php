@@ -155,7 +155,7 @@
             <!-- Tombol Masuk -->
             <div class="flex items-center gap-3">
                 @auth
-                    <a href="{{ url('/') }}"
+                    <a href="{{ route('dashboard') }}"
                         class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2 rounded-full shadow-soft-blue transition-all duration-200">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -166,7 +166,7 @@
                     </a>
                 @else
                     <div class="flex items-center gap-3">
-                        <a href="{{ url('/auth') }}"
+                        <a href="{{ route('login') }}"
                             class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 sm:px-6 py-2 sm:py-2.5 rounded-full shadow-soft-blue hover:-translate-y-0.5 transition-all duration-200">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd"
@@ -174,6 +174,10 @@
                                     clip-rule="evenodd" />
                             </svg>
                             <span>Masuk</span>
+                        </a>
+                        <a href="{{ route('register.role') }}"
+                            class="inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-sm font-semibold px-4 py-2.5 rounded-full transition-all">
+                            Daftar
                         </a>
                     </div>
                 @endauth
@@ -221,8 +225,8 @@
                 <!-- Subheadline -->
                 <p class="text-slate-600 text-sm sm:text-base xl:text-[17px] leading-relaxed max-w-xl font-normal">
                     Kuasai logika pemrograman secara bertahap lewat kartu pengetahuan interaktif, penyusunan <span
-                        class="font-medium text-slate-700">flowchart</span>, hingga tantangan ngoding—langsung mulai
-                    tanpa perlu daftar akun.
+                        class="font-medium text-slate-700">flowchart</span>, hingga tantangan ngoding—bisa dipelajari
+                    secara mandiri atau bersama guru.
                 </p>
 
                 <!-- Action Buttons -->
