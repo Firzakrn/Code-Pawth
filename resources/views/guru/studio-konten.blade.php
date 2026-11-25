@@ -2,9 +2,13 @@
 
 @section('title', 'Studio Konten Guru')
 
-@section('content')
-
 @php
+    /*
+    |--------------------------------------------------------------------------
+    | DAFTAR TEMPLATE CODEPAWTH
+    |--------------------------------------------------------------------------
+    */
+
     $templates = [
         [
             'id' => 'flashcard',
@@ -13,45 +17,46 @@
             'description' => 'Kartu dua sisi untuk mengenalkan konsep, sintaks, dan istilah pemrograman.',
             'mascot' => 'mascot_card.png',
             'levels' => ['SD', 'SMP', 'SMA'],
-            'example' => 'Depan: print() | Belakang: Perintah untuk menampilkan teks.',
+            'example' => 'Sisi depan: print(). Sisi belakang: Perintah untuk menampilkan teks.',
             'fields' => [
-                'Judul dan deskripsi materi',
-                'Teks sisi depan kartu',
-                'Teks sisi belakang kartu',
-                'Gambar pendukung (opsional)',
-                'Tambah banyak kartu',
+                'Judul dan jenjang materi',
+                'Kategori dan ikon kartu',
+                'Teks sisi depan',
+                'Penjelasan sisi belakang',
+                'Tambah atau hapus kartu',
             ],
         ],
         [
             'id' => 'artikel',
             'type' => 'materi',
-            'title' => 'Tulisan + Gambar',
+            'title' => 'Penjelasan Dengan Gambar',
             'description' => 'Materi berbentuk bacaan dengan subjudul, gambar, dan penjelasan.',
             'mascot' => 'mascot_dashboard.png',
             'levels' => ['SD', 'SMP', 'SMA'],
-            'example' => 'Materi algoritma dengan penjelasan bertahap dan gambar flowchart.',
+            'example' => 'Materi algoritma dengan penjelasan bertahap dan ilustrasi flowchart.',
             'fields' => [
-                'Judul dan subjudul',
+                'Judul dan jenjang materi',
+                'Subjudul setiap bagian',
                 'Paragraf penjelasan',
-                'Unggah gambar',
-                'Caption dan catatan penting',
-                'Tambah bagian materi',
+                'Unggah gambar pendukung',
+                'Caption gambar',
+                'Tambah atau hapus bagian',
             ],
         ],
         [
             'id' => 'foto',
             'type' => 'materi',
-            'title' => 'Foto + Penjelasan',
+            'title' => 'Praktik Coding Python',
             'description' => 'Unggah gambar, poster, atau screenshot, kemudian berikan penjelasan.',
             'mascot' => 'mascot_what.png',
             'levels' => ['SD', 'SMP', 'SMA'],
-            'example' => 'Gambar simbol decision dengan penjelasan fungsi dan contohnya.',
+            'example' => 'Gambar simbol decision beserta fungsi dan contohnya.',
             'fields' => [
-                'Judul materi',
+                'Judul dan jenjang materi',
                 'Unggah foto atau ilustrasi',
                 'Penjelasan gambar',
-                'Caption',
-                'Pertanyaan refleksi (opsional)',
+                'Caption foto',
+                'Tambah atau hapus gambar',
             ],
         ],
         [
@@ -61,12 +66,12 @@
             'description' => 'Siswa memasangkan istilah, kode, simbol, atau gambar dengan jawaban.',
             'mascot' => 'mascot_loveya.png',
             'levels' => ['SD', 'SMP', 'SMA'],
-            'example' => 'Simbol belah ketupat dipasangkan dengan fungsi keputusan.',
+            'example' => 'Cocokkan simbol flowchart dengan fungsi yang benar.',
             'fields' => [
-                'Judul dan petunjuk',
-                'Daftar item kolom kiri',
-                'Daftar item kolom kanan',
-                'Pasangan jawaban benar',
+                'Judul evaluasi',
+                'Pertanyaan kolom kiri',
+                'Jawaban kolom kanan',
+                'Kunci pasangan',
                 'Pembahasan dan skor',
             ],
         ],
@@ -95,12 +100,11 @@
             'levels' => ['SMP', 'SMA'],
             'example' => 'Susun flowchart untuk menentukan bilangan ganjil atau genap.',
             'fields' => [
-                'Judul dan instruksi tantangan',
-                'Node flowchart yang tersedia',
+                'Judul dan instruksi',
+                'Node flowchart',
                 'Hubungan dan arah panah',
-                'Alur jawaban benar',
+                'Kunci alur benar',
                 'Preview kode Python',
-                'Aturan evaluasi',
             ],
         ],
         [
@@ -110,40 +114,66 @@
             'description' => 'Blok kode yang bisa disusun, dipindahkan, dan diedit nilainya.',
             'mascot' => 'mascot_run.png',
             'levels' => ['SMP', 'SMA'],
-            'example' => 'Susun blok variabel nilai, kondisi if, dan perintah output.',
+            'example' => 'Susun blok variabel, kondisi if, dan perintah output.',
             'fields' => [
                 'Instruksi tantangan',
-                'Jenis blok yang tersedia',
+                'Jenis blok',
                 'Variabel dan nilai awal',
-                'Bagian blok yang bisa diedit',
+                'Blok yang bisa diedit',
                 'Output yang diharapkan',
-                'Aturan pemeriksaan jawaban',
             ],
         ],
     ];
 
-    $materialTemplates = array_values(array_filter(
-        $templates,
-        fn ($item) => $item['type'] === 'materi'
-    ));
+    $materialTemplates = array_values(
+        array_filter(
+            $templates,
+            fn ($item) => $item['type'] === 'materi'
+        )
+    );
 
-    $evaluationTemplates = array_values(array_filter(
-        $templates,
-        fn ($item) => $item['type'] === 'evaluasi'
-    ));
+    $evaluationTemplates = array_values(
+        array_filter(
+            $templates,
+            fn ($item) => $item['type'] === 'evaluasi'
+        )
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | CEK ROUTE EDITOR
+    |--------------------------------------------------------------------------
+    | Jangan langsung memanggil route() jika belum terdaftar,
+    | karena akan menyebabkan RouteNotFoundException.
+    */
+
+    $hasMaterialEditor = \Illuminate\Support\Facades\Route::has(
+        'guru.materi.create'
+    );
+
+    $hasMaterialList = \Illuminate\Support\Facades\Route::has(
+        'guru.materi.index'
+    );
 @endphp
+
+@section('content')
 
 <div class="studio-page">
 
-    {{-- HEADER --}}
+    {{-- BREADCRUMB --}}
     <div class="studio-breadcrumb">
+
         <a href="{{ route('guru.dashboard') }}">
             Dashboard Guru
         </a>
+
         <span>›</span>
+
         <strong>Studio Konten</strong>
+
     </div>
 
+    {{-- HERO --}}
     <section class="studio-hero">
 
         <div class="studio-hero-copy">
@@ -168,13 +198,26 @@
                 <span>🎓 SD – SMA</span>
             </div>
 
+            @if($hasMaterialList)
+
+                <a
+                    href="{{ route('guru.materi.index') }}"
+                    class="studio-my-materials"
+                >
+                    📂 Lihat Materi Saya →
+                </a>
+
+            @endif
+
         </div>
 
         <div class="studio-hero-mascot">
+
             <img
                 src="{{ asset('images/mascot_class.png') }}"
-                alt="Maskot CodePawth sedang menggunakan laptop"
+                alt="Maskot CodePawth"
             >
+
         </div>
 
     </section>
@@ -183,64 +226,96 @@
     <section class="studio-class-panel">
 
         <div class="studio-class-heading">
+
             <div class="studio-class-icon">🏫</div>
 
             <div>
                 <h2>Untuk kelas mana?</h2>
+
                 <p>
-                    Opsional untuk sekarang. Kamu tetap bisa
-                    menjelajahi template tanpa memilih kelas.
+                    Kamu bisa memilih kelas sekarang
+                    atau menentukannya nanti saat mengisi materi.
                 </p>
             </div>
+
         </div>
 
         <div class="studio-class-control">
 
-            <label for="studioClass">Kelas tujuan</label>
+            <label for="studioClass">
+                Kelas Tujuan
+            </label>
 
             <select id="studioClass">
+
                 <option value="">
                     Belum memilih kelas
                 </option>
 
-                @foreach ($classes as $class)
+                @foreach($classes as $class)
+
                     <option value="{{ $class->id }}">
                         {{ $class->name }} — {{ $class->level }}
                     </option>
+
                 @endforeach
+
             </select>
 
-            @if ($classes->isEmpty())
+            @if($classes->isEmpty())
+
                 <p class="studio-small-note">
                     Belum ada kelas.
                     <a href="{{ route('guru.dashboard') }}">
-                        Buat kelas di Dashboard Guru
+                        Buat kelas terlebih dahulu
                     </a>.
                 </p>
+
             @endif
 
         </div>
 
     </section>
 
-    {{-- INTRO PILIH TEMPLATE --}}
+    {{-- INFORMASI JIKA ROUTE BELUM ADA --}}
+    @unless($hasMaterialEditor)
+
+        <div class="studio-warning">
+            <span>⚠️</span>
+
+            <div>
+                <strong>Editor materi belum terhubung.</strong>
+
+                <p>
+                    Template tetap bisa dilihat.
+                    Untuk mulai membuat materi, daftarkan
+                    route guru.materi.create dan siapkan
+                    halaman materi-editor.blade.php.
+                </p>
+            </div>
+        </div>
+
+    @endunless
+
+    {{-- HEADER TEMPLATE --}}
     <div class="studio-section-intro">
 
         <div>
-            <span class="studio-eyebrow">PERPUSTAKAAN TEMPLATE</span>
+            <span class="studio-eyebrow">
+                PERPUSTAKAAN TEMPLATE
+            </span>
 
             <h2>Mau membuat apa hari ini?</h2>
 
             <p>
-                Pilih jenis konten yang ingin kamu siapkan.
-                Semua template dapat disesuaikan dengan materi
-                pembelajaran.
+                Pilih template yang sesuai dengan kebutuhan
+                pembelajaranmu.
             </p>
         </div>
 
         <img
             src="{{ asset('images/mascot_peeking.png') }}"
-            alt="Maskot mengintip pilihan template"
+            alt="Maskot mengintip"
             class="studio-peek-mascot"
         >
 
@@ -249,27 +324,32 @@
     {{-- FILTER --}}
     <div class="studio-toolbar">
 
-        <div class="studio-filter-buttons"
-             aria-label="Filter jenis template">
+        <div class="studio-filter-buttons">
 
-            <button type="button"
-                    class="studio-filter active"
-                    data-filter="semua"
-                    aria-pressed="true">
+            <button
+                type="button"
+                class="studio-filter active"
+                data-filter="semua"
+                aria-pressed="true"
+            >
                 Semua
             </button>
 
-            <button type="button"
-                    class="studio-filter"
-                    data-filter="materi"
-                    aria-pressed="false">
+            <button
+                type="button"
+                class="studio-filter"
+                data-filter="materi"
+                aria-pressed="false"
+            >
                 📖 Materi
             </button>
 
-            <button type="button"
-                    class="studio-filter"
-                    data-filter="evaluasi"
-                    aria-pressed="false">
+            <button
+                type="button"
+                class="studio-filter"
+                data-filter="evaluasi"
+                aria-pressed="false"
+            >
                 📝 Evaluasi
             </button>
 
@@ -277,8 +357,7 @@
 
         <div class="studio-toolbar-right">
 
-            <select id="studioLevel"
-                    aria-label="Filter jenjang">
+            <select id="studioLevel">
                 <option value="semua">Semua Jenjang</option>
                 <option value="SD">SD</option>
                 <option value="SMP">SMP</option>
@@ -289,45 +368,50 @@
                 type="search"
                 id="studioSearch"
                 placeholder="Cari template..."
-                aria-label="Cari template"
             >
 
         </div>
 
     </div>
 
-    {{-- TEMPLATE YANG DIPILIH --}}
-    <div id="studioSelected" class="studio-selected" hidden>
-        <div>
-            <span>✓ TEMPLATE DIPILIH</span>
-            <strong id="studioSelectedName"></strong>
-            <p id="studioSelectedClass"></p>
-        </div>
-
-        <button type="button" id="studioClearSelection">
-            Batalkan
-        </button>
-    </div>
-
-    {{-- MATERI --}}
-    <section id="studioMaterials" class="studio-group">
+    {{-- TEMPLATE MATERI --}}
+    <section
+        id="studioMaterials"
+        class="studio-group"
+    >
 
         <div class="studio-group-heading">
+
             <div>
-                <span class="studio-eyebrow">01 / MATERI</span>
+                <span class="studio-eyebrow">
+                    01 / MATERI
+                </span>
+
                 <h2>Template Materi</h2>
+
                 <p>
                     Buat konten pembelajaran yang menarik
                     dan mudah dipahami.
                 </p>
             </div>
 
-            <span class="studio-count">3 Template</span>
+            <span class="studio-count">
+                3 Template
+            </span>
+
         </div>
 
         <div class="studio-grid studio-grid-material">
 
-            @foreach ($materialTemplates as $template)
+            @foreach($materialTemplates as $template)
+
+                @php
+                    $editorUrl = $hasMaterialEditor
+                        ? route('guru.materi.create', [
+                            'type' => $template['id']
+                        ])
+                        : '';
+                @endphp
 
                 <article
                     class="studio-template"
@@ -339,26 +423,31 @@
                     data-example="{{ $template['example'] }}"
                     data-fields="{{ implode('|', $template['fields']) }}"
                     data-mascot="{{ asset('images/' . $template['mascot']) }}"
+                    data-editor-url="{{ $editorUrl }}"
                 >
 
                     <div class="studio-template-art">
+
                         <span class="studio-template-type">
                             📖 MATERI
                         </span>
 
                         <img
                             src="{{ asset('images/' . $template['mascot']) }}"
-                            alt="Maskot template {{ $template['title'] }}"
+                            alt="Maskot {{ $template['title'] }}"
                             loading="lazy"
                         >
+
                     </div>
 
                     <div class="studio-template-body">
 
                         <div class="studio-level-tags">
-                            @foreach ($template['levels'] as $level)
+
+                            @foreach($template['levels'] as $level)
                                 <span>{{ $level }}</span>
                             @endforeach
+
                         </div>
 
                         <h3>{{ $template['title'] }}</h3>
@@ -367,7 +456,8 @@
 
                         <button
                             type="button"
-                            class="studio-template-button">
+                            class="studio-template-button"
+                        >
                             Lihat & Pilih Template
                             <span>→</span>
                         </button>
@@ -382,29 +472,36 @@
 
     </section>
 
-    {{-- EVALUASI --}}
-    <section id="studioEvaluations" class="studio-group">
+    {{-- TEMPLATE EVALUASI --}}
+    <section
+        id="studioEvaluations"
+        class="studio-group"
+    >
 
         <div class="studio-group-heading">
 
             <div>
-                <span class="studio-eyebrow">02 / EVALUASI</span>
+                <span class="studio-eyebrow">
+                    02 / EVALUASI
+                </span>
 
                 <h2>Template Soal & Evaluasi</h2>
 
                 <p>
-                    Rancang tantangan yang menguji pemahaman,
-                    logika, dan kemampuan coding siswa.
+                    Rancang aktivitas untuk menguji
+                    logika dan kemampuan coding siswa.
                 </p>
             </div>
 
-            <span class="studio-count">4 Template</span>
+            <span class="studio-count">
+                4 Template
+            </span>
 
         </div>
 
         <div class="studio-grid studio-grid-evaluation">
 
-            @foreach ($evaluationTemplates as $template)
+            @foreach($evaluationTemplates as $template)
 
                 <article
                     class="studio-template"
@@ -416,26 +513,31 @@
                     data-example="{{ $template['example'] }}"
                     data-fields="{{ implode('|', $template['fields']) }}"
                     data-mascot="{{ asset('images/' . $template['mascot']) }}"
+                    data-editor-url=""
                 >
 
                     <div class="studio-template-art">
+
                         <span class="studio-template-type">
                             📝 EVALUASI
                         </span>
 
                         <img
                             src="{{ asset('images/' . $template['mascot']) }}"
-                            alt="Maskot template {{ $template['title'] }}"
+                            alt="Maskot {{ $template['title'] }}"
                             loading="lazy"
                         >
+
                     </div>
 
                     <div class="studio-template-body">
 
                         <div class="studio-level-tags">
-                            @foreach ($template['levels'] as $level)
+
+                            @foreach($template['levels'] as $level)
                                 <span>{{ $level }}</span>
                             @endforeach
+
                         </div>
 
                         <h3>{{ $template['title'] }}</h3>
@@ -444,8 +546,9 @@
 
                         <button
                             type="button"
-                            class="studio-template-button">
-                            Lihat & Pilih Template
+                            class="studio-template-button"
+                        >
+                            Lihat Detail Template
                             <span>→</span>
                         </button>
 
@@ -459,64 +562,100 @@
 
     </section>
 
-    {{-- PESAN FILTER KOSONG --}}
-    <div id="studioEmpty" class="studio-empty" hidden>
-        <span>🔎</span>
+    {{-- TEMPLATE TIDAK DITEMUKAN --}}
+    <div
+        id="studioEmpty"
+        class="studio-empty"
+        hidden
+    >
+
+        <img
+            src="{{ asset('images/mascot_peek.png') }}"
+            alt="Maskot mencari template"
+        >
+
         <h3>Template belum ditemukan</h3>
-        <p>Coba ubah pencarian atau pilihan jenjang.</p>
+
+        <p>
+            Coba ubah pencarian atau pilihan jenjang.
+        </p>
+
     </div>
 
-    {{-- PANDUAN MASKOT --}}
+    {{-- TIPS MASKOT --}}
     <section class="studio-tips">
 
         <div class="studio-tips-heading">
+
             <span class="studio-eyebrow">
                 TIPS DARI MASKOT CODEPAWTH
             </span>
 
             <h2>Bikin belajar jadi lebih menyenangkan!</h2>
+
         </div>
 
         <div class="studio-tips-grid">
 
             <div class="studio-tip">
+
                 <img
                     src="{{ asset('images/mascot_cheers.png') }}"
                     alt="Maskot bersemangat"
-                    loading="lazy"
                 >
+
                 <strong>Mulai dari yang mudah</strong>
-                <p>Gunakan flashcard untuk konsep baru.</p>
+
+                <p>
+                    Gunakan Flashcard untuk mengenalkan
+                    konsep baru.
+                </p>
+
             </div>
 
             <div class="studio-tip">
+
                 <img
                     src="{{ asset('images/mascot_happy.png') }}"
-                    alt="Maskot membawa piala"
-                    loading="lazy"
+                    alt="Maskot senang"
                 >
+
                 <strong>Berikan apresiasi</strong>
-                <p>Rayakan pencapaian setiap siswa.</p>
+
+                <p>
+                    Rayakan setiap pencapaian siswa.
+                </p>
+
             </div>
 
             <div class="studio-tip">
+
                 <img
                     src="{{ asset('images/mascot_loveya.png') }}"
-                    alt="Maskot dengan simbol hati"
-                    loading="lazy"
+                    alt="Maskot penyemangat"
                 >
+
                 <strong>Beri petunjuk ramah</strong>
-                <p>Bantu siswa memahami kesalahannya.</p>
+
+                <p>
+                    Bantu siswa memahami kesalahan.
+                </p>
+
             </div>
 
             <div class="studio-tip">
+
                 <img
                     src="{{ asset('images/mascot_angry.png') }}"
-                    alt="Maskot sedang kesal"
-                    loading="lazy"
+                    alt="Maskot tantangan"
                 >
+
                 <strong>Jadikan bug tantangan</strong>
-                <p>Ajak siswa mencari dan memperbaiki error.</p>
+
+                <p>
+                    Ajak siswa menemukan dan memperbaiki error.
+                </p>
+
             </div>
 
         </div>
@@ -526,26 +665,38 @@
 </div>
 
 {{-- MODAL DETAIL TEMPLATE --}}
-<dialog id="studioModal" class="studio-modal">
+<dialog
+    id="studioModal"
+    class="studio-modal"
+>
 
     <div class="studio-modal-header">
 
-        <img id="studioModalMascot"
-             src=""
-             alt="Maskot template">
+        <img
+            id="studioModalMascot"
+            src="{{ asset('images/mascot_card.png') }}"
+            alt="Maskot template"
+        >
 
         <div>
-            <span class="studio-eyebrow" id="studioModalType">
+
+            <span
+                class="studio-eyebrow"
+                id="studioModalType"
+            >
                 TEMPLATE
             </span>
 
             <h2 id="studioModalTitle"></h2>
+
         </div>
 
-        <button type="button"
-                id="studioModalClose"
-                class="studio-modal-close"
-                aria-label="Tutup detail">
+        <button
+            type="button"
+            id="studioModalClose"
+            class="studio-modal-close"
+            aria-label="Tutup"
+        >
             ✕
         </button>
 
@@ -556,31 +707,39 @@
         <p id="studioModalDescription"></p>
 
         <h3>Contoh Penggunaan</h3>
-        <div id="studioModalExample" class="studio-example"></div>
 
-        <h3>Komponen yang akan diisi guru</h3>
+        <div
+            id="studioModalExample"
+            class="studio-example"
+        ></div>
+
+        <h3>Komponen yang Bisa Diisi Guru</h3>
+
         <ul id="studioModalFields"></ul>
 
-        <p class="studio-modal-note">
-            Ini adalah pratinjau template.
-            Editor dan penyimpanan konten akan dibuat
-            pada tahap pengembangan berikutnya.
-        </p>
+        <p
+            id="studioModalNote"
+            class="studio-modal-note"
+        ></p>
 
     </div>
 
     <div class="studio-modal-actions">
 
-        <button type="button"
-                class="studio-modal-cancel"
-                id="studioCancel">
+        <button
+            type="button"
+            class="studio-modal-cancel"
+            id="studioCancel"
+        >
             Kembali
         </button>
 
-        <button type="button"
-                class="studio-modal-select"
-                id="studioChoose">
-            Pilih Template Ini ✓
+        <button
+            type="button"
+            class="studio-modal-select"
+            id="studioChoose"
+        >
+            Gunakan Template →
         </button>
 
     </div>
@@ -590,33 +749,40 @@
 @endsection
 
 @push('styles')
+
 <style>
+    /* =========================================
+       STUDIO KONTEN - CODEPAWTH
+    ========================================= */
 
     .studio-page {
         max-width: 1180px;
         margin: 0 auto;
     }
 
-    .studio-page * {
+    .studio-page *,
+    .studio-modal * {
         box-sizing: border-box;
+    }
+
+    /* PENTING: MEMPERBAIKI FILTER HIDDEN */
+    .studio-page [hidden] {
+        display: none !important;
     }
 
     .studio-breadcrumb {
         display: flex;
-        gap: 9px;
         align-items: center;
-        color: #8b9fb4;
-        font-size: 12px;
+        gap: 9px;
         margin-bottom: 22px;
+        font-size: 12px;
+        color: #8b9fb4;
     }
 
     .studio-breadcrumb a {
         color: #719bc3;
         font-weight: 700;
-    }
-
-    .studio-breadcrumb strong {
-        color: #344b65;
+        text-decoration: none;
     }
 
     .studio-eyebrow {
@@ -626,23 +792,26 @@
         color: #719bc3;
     }
 
-    /* HERO */
+    /* =========================================
+       HERO
+    ========================================= */
 
     .studio-hero {
         position: relative;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
+        gap: 20px;
         min-height: 245px;
-        overflow: hidden;
+        padding: 34px 40px;
         border: 1px solid #d5e8fa;
         border-radius: 27px;
-        padding: 34px 40px;
         background: linear-gradient(
             115deg,
             #e4f1ff,
             #f4f9ff
         );
+        overflow: hidden;
     }
 
     .studio-hero-copy {
@@ -653,10 +822,10 @@
 
     .studio-hero h1 {
         margin: 12px 0;
-        color: #344b65;
         font-size: clamp(27px, 3vw, 38px);
         font-weight: 800;
         letter-spacing: -1px;
+        color: #344b65;
     }
 
     .studio-hero h1 span {
@@ -666,9 +835,9 @@
     .studio-hero p {
         max-width: 610px;
         margin: 0;
-        color: #718ba5;
         font-size: 13px;
         line-height: 1.8;
+        color: #718ba5;
     }
 
     .studio-hero-tags {
@@ -687,23 +856,40 @@
         font-weight: 800;
     }
 
+    .studio-my-materials {
+        display: inline-flex;
+        margin-top: 20px;
+        padding: 11px 17px;
+        border-radius: 12px;
+        background: #719bc3;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .studio-my-materials:hover {
+        background: #5a8bb9;
+    }
+
     .studio-hero-mascot {
         display: flex;
-        align-items: flex-end;
         justify-content: center;
-        flex-shrink: 0;
+        align-items: flex-end;
         width: 215px;
         height: 190px;
+        flex-shrink: 0;
     }
 
     .studio-hero-mascot img {
         width: 100%;
         height: 100%;
         object-fit: contain;
-        filter: drop-shadow(0 10px 14px rgba(93,130,170,.12));
     }
 
-    /* PANEL KELAS */
+    /* =========================================
+       PILIH KELAS
+    ========================================= */
 
     .studio-class-panel {
         display: flex;
@@ -728,10 +914,10 @@
         place-items: center;
         width: 52px;
         height: 52px;
+        flex-shrink: 0;
         background: #eaf4ff;
         border-radius: 15px;
         font-size: 25px;
-        flex-shrink: 0;
     }
 
     .studio-class-heading h2 {
@@ -741,9 +927,9 @@
 
     .studio-class-heading p {
         margin: 0;
-        color: #849ab0;
         font-size: 12px;
         line-height: 1.7;
+        color: #849ab0;
     }
 
     .studio-class-control {
@@ -762,21 +948,21 @@
     .studio-toolbar-right select,
     .studio-toolbar-right input {
         width: 100%;
+        padding: 11px 12px;
         border: 1px solid #d9e8f5;
         border-radius: 11px;
-        padding: 11px 12px;
-        color: #344b65;
         background: #f9fcff;
+        color: #344b65;
         font: inherit;
         font-size: 12px;
         outline: none;
     }
 
     .studio-small-note {
+        margin: 8px 0 0;
         font-size: 11px;
         line-height: 1.6;
         color: #849ab0;
-        margin: 8px 0 0;
     }
 
     .studio-small-note a {
@@ -784,32 +970,55 @@
         font-weight: 800;
     }
 
-    /* PILIH TEMPLATE */
+    .studio-warning {
+        display: flex;
+        gap: 12px;
+        margin-top: 17px;
+        padding: 15px 18px;
+        border: 1px solid #f5dbad;
+        background: #fff9ed;
+        border-radius: 13px;
+        color: #916d33;
+    }
+
+    .studio-warning strong {
+        font-size: 12px;
+    }
+
+    .studio-warning p {
+        margin: 5px 0 0;
+        font-size: 11px;
+        line-height: 1.7;
+    }
+
+    /* =========================================
+       HEADER & FILTER
+    ========================================= */
 
     .studio-section-intro {
-        position: relative;
         display: flex;
-        align-items: center;
         justify-content: space-between;
+        align-items: center;
+        gap: 20px;
         margin: 49px 0 20px;
     }
 
     .studio-section-intro h2 {
-        font-size: 26px;
         margin: 9px 0 7px;
+        font-size: 26px;
     }
 
     .studio-section-intro p,
     .studio-group-heading p {
-        color: #849ab0;
-        line-height: 1.8;
-        font-size: 13px;
         margin: 0;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #849ab0;
     }
 
     .studio-peek-mascot {
-        height: 90px;
         width: 95px;
+        height: 90px;
         object-fit: contain;
     }
 
@@ -817,9 +1026,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
         gap: 20px;
         margin-bottom: 28px;
-        flex-wrap: wrap;
     }
 
     .studio-filter-buttons {
@@ -834,18 +1043,14 @@
     .studio-filter {
         border: 0;
         border-radius: 10px;
+        padding: 11px 17px;
         background: transparent;
         color: #6f8ca8;
-        font-family: inherit;
+        font: inherit;
         font-size: 12px;
         font-weight: 800;
-        padding: 11px 17px;
         cursor: pointer;
         transition: .2s ease;
-    }
-
-    .studio-filter:hover {
-        color: #426f9d;
     }
 
     .studio-filter.active {
@@ -867,7 +1072,9 @@
         width: 205px;
     }
 
-    /* GROUP */
+    /* =========================================
+       TEMPLATE GROUP
+    ========================================= */
 
     .studio-group {
         margin-top: 32px;
@@ -888,10 +1095,10 @@
     }
 
     .studio-count {
+        padding: 9px 13px;
+        border-radius: 30px;
         background: #eaf4ff;
         color: #719bc3;
-        border-radius: 30px;
-        padding: 9px 13px;
         font-size: 11px;
         font-weight: 800;
         white-space: nowrap;
@@ -903,12 +1110,16 @@
     }
 
     .studio-grid-material {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0,1fr));
     }
 
     .studio-grid-evaluation {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0,1fr));
     }
+
+    /* =========================================
+       KARTU TEMPLATE
+    ========================================= */
 
     .studio-template {
         display: flex;
@@ -918,9 +1129,7 @@
         border: 1px solid #e1ecf6;
         border-radius: 22px;
         background: white;
-        transition: transform .2s ease,
-                    border-color .2s ease,
-                    box-shadow .2s ease;
+        transition: .2s ease;
     }
 
     .studio-template:hover {
@@ -929,30 +1138,18 @@
         box-shadow: 0 14px 30px rgba(87,130,170,.09);
     }
 
-    .studio-template.is-selected {
-        border: 2px solid #719bc3;
-    }
-
     .studio-template-art {
         position: relative;
         display: flex;
         justify-content: center;
         align-items: flex-end;
         height: 166px;
-        background: linear-gradient(
-            145deg,
-            #eaf4ff,
-            #f7faff
-        );
+        background: linear-gradient(145deg,#eaf4ff,#f7faff);
         overflow: hidden;
     }
 
     .studio-template:nth-child(even) .studio-template-art {
-        background: linear-gradient(
-            145deg,
-            #eff1ff,
-            #f8faff
-        );
+        background: linear-gradient(145deg,#eff1ff,#f8faff);
     }
 
     .studio-template-art img {
@@ -971,13 +1168,13 @@
         position: absolute;
         top: 15px;
         left: 15px;
+        z-index: 1;
         padding: 7px 10px;
-        background: white;
         border-radius: 30px;
+        background: white;
         color: #6489b0;
         font-size: 10px;
         font-weight: 800;
-        z-index: 1;
     }
 
     .studio-template-body {
@@ -1003,31 +1200,31 @@
     }
 
     .studio-template h3 {
-        font-size: 17px;
         margin: 0 0 9px;
+        font-size: 17px;
         color: #344b65;
     }
 
     .studio-template-body > p {
         flex: 1;
+        margin: 0 0 21px;
+        color: #8499ad;
         font-size: 12px;
         line-height: 1.8;
-        color: #8499ad;
-        margin: 0 0 21px;
     }
 
     .studio-template-button {
-        width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 10px;
+        width: 100%;
         padding: 12px 15px;
         border: 1px solid #d5e7f8;
         border-radius: 11px;
         background: #eaf4ff;
         color: #537fac;
-        font-family: inherit;
+        font: inherit;
         font-size: 12px;
         font-weight: 800;
         cursor: pointer;
@@ -1036,64 +1233,47 @@
 
     .studio-template-button:hover {
         background: #719bc3;
-        border-color: #719bc3;
         color: white;
+        border-color: #719bc3;
     }
 
-    /* PILIHAN TERAKHIR */
+    /* =========================================
+       TEMPLATE KOSONG
+    ========================================= */
 
-    .studio-selected {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 15px;
-        margin-bottom: 23px;
-        padding: 16px 19px;
-        border: 1px solid #bcd9ef;
-        border-radius: 15px;
-        background: #edf6ff;
+    .studio-empty {
+        margin: 25px 0;
+        padding: 40px 20px;
+        border: 1px dashed #c9dfef;
+        border-radius: 20px;
+        text-align: center;
     }
 
-    .studio-selected[hidden] {
-        display: none;
+    .studio-empty img {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
     }
 
-    .studio-selected span {
-        display: block;
-        color: #719bc3;
-        font-size: 10px;
-        font-weight: 800;
-        margin-bottom: 5px;
+    .studio-empty h3 {
+        margin: 10px 0;
     }
 
-    .studio-selected strong {
-        font-size: 14px;
+    .studio-empty p {
+        color: #849ab0;
+        font-size: 12px;
     }
 
-    .studio-selected p {
-        margin: 5px 0 0;
-        color: #7991a9;
-        font-size: 11px;
-    }
-
-    .studio-selected button {
-        border: 1px solid #cfdfed;
-        border-radius: 10px;
-        padding: 10px 14px;
-        background: white;
-        color: #537ca5;
-        font-family: inherit;
-        font-weight: 800;
-        cursor: pointer;
-    }
-
-    /* TIPS MASKOT */
+    /* =========================================
+       TIPS MASKOT
+    ========================================= */
 
     .studio-tips {
+        margin-top: 35px;
         padding: 28px;
+        border: 1px solid #dbeafa;
         border-radius: 24px;
         background: #eaf4ff;
-        border: 1px solid #dbeafa;
     }
 
     .studio-tips-heading {
@@ -1108,14 +1288,14 @@
 
     .studio-tips-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4,minmax(0,1fr));
         gap: 14px;
     }
 
     .studio-tip {
+        padding: 16px;
         background: rgba(255,255,255,.85);
         border-radius: 17px;
-        padding: 16px;
         text-align: center;
     }
 
@@ -1135,40 +1315,26 @@
 
     .studio-tip p {
         margin: 0;
-        font-size: 11px;
         color: #8a9fb2;
+        font-size: 11px;
         line-height: 1.7;
     }
 
-    .studio-empty {
-        text-align: center;
-        padding: 50px 20px;
-        border: 1px dashed #c9dfef;
-        border-radius: 20px;
-        margin: 25px 0;
-    }
-
-    .studio-empty[hidden] {
-        display: none;
-    }
-
-    .studio-empty span {
-        font-size: 35px;
-    }
-
-    /* MODAL */
+    /* =========================================
+       MODAL DETAIL
+    ========================================= */
 
     .studio-modal {
-        width: min(540px, calc(100% - 30px));
-        max-height: min(85vh, 740px);
+        width: min(540px,calc(100% - 30px));
+        max-height: 85vh;
         padding: 0;
+        overflow-y: auto;
         border: 1px solid #dce9f6;
         border-radius: 23px;
         background: white;
         color: #344b65;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: 'Plus Jakarta Sans',sans-serif;
         box-shadow: 0 25px 70px rgba(48,74,103,.15);
-        overflow-y: auto;
     }
 
     .studio-modal::backdrop {
@@ -1179,8 +1345,8 @@
     .studio-modal-header {
         position: relative;
         display: flex;
-        gap: 17px;
         align-items: center;
+        gap: 17px;
         padding: 22px 24px;
         background: #edf6ff;
     }
@@ -1193,19 +1359,19 @@
     }
 
     .studio-modal-header h2 {
-        font-size: 21px;
         margin: 8px 25px 0 0;
+        font-size: 21px;
     }
 
     .studio-modal-close {
         position: absolute;
         top: 15px;
         right: 15px;
+        padding: 8px 11px;
         border: 0;
         border-radius: 9px;
-        padding: 8px 11px;
-        color: #5c7c9c;
         background: white;
+        color: #5c7c9c;
         cursor: pointer;
     }
 
@@ -1220,14 +1386,14 @@
     }
 
     .studio-modal-content h3 {
-        font-size: 13px;
         margin: 23px 0 10px;
+        font-size: 13px;
     }
 
     .studio-example {
-        background: #f0f7ff;
-        border-radius: 12px;
         padding: 14px;
+        border-radius: 12px;
+        background: #f0f7ff;
         color: #537ca5;
         font-size: 12px;
         line-height: 1.8;
@@ -1242,8 +1408,8 @@
 
     .studio-modal-content .studio-modal-note {
         padding: 12px;
-        background: #fff9e9;
         border-radius: 11px;
+        background: #fff9e9;
         color: #967949;
         font-size: 11px;
     }
@@ -1256,12 +1422,12 @@
     }
 
     .studio-modal-actions button {
-        border-radius: 11px;
-        border: 0;
         padding: 12px 16px;
+        border: 0;
+        border-radius: 11px;
         font: inherit;
-        font-weight: 800;
         font-size: 12px;
+        font-weight: 800;
         cursor: pointer;
     }
 
@@ -1275,28 +1441,34 @@
         color: white;
     }
 
-    /* RESPONSIVE */
+    .studio-modal-select:disabled {
+        background: #d5e0eb;
+        color: #8da1b5;
+        cursor: not-allowed;
+    }
 
-    @media (max-width: 1000px) {
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+
+    @media(max-width:1000px) {
         .studio-grid-material {
-            grid-template-columns: repeat(2, minmax(0,1fr));
+            grid-template-columns: repeat(2,minmax(0,1fr));
         }
 
         .studio-tips-grid {
-            grid-template-columns: repeat(2, minmax(0,1fr));
+            grid-template-columns: repeat(2,minmax(0,1fr));
         }
     }
 
-    @media (max-width: 720px) {
+    @media(max-width:720px) {
         .studio-hero {
             padding: 25px;
-            min-height: 0;
         }
 
         .studio-hero-mascot {
             width: 105px;
             height: 120px;
-            align-self: flex-end;
         }
 
         .studio-class-panel {
@@ -1324,11 +1496,7 @@
         }
     }
 
-    @media (max-width: 480px) {
-        .studio-hero {
-            display: block;
-        }
-
+    @media(max-width:480px) {
         .studio-hero-mascot {
             display: none;
         }
@@ -1339,7 +1507,7 @@
         }
 
         .studio-tips-grid {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2,minmax(0,1fr));
         }
 
         .studio-tip {
@@ -1352,20 +1520,26 @@
         }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        .studio-page *,
-        .studio-page *::before,
-        .studio-page *::after {
-            transition: none !important;
+    @media(prefers-reduced-motion:reduce) {
+        .studio-template,
+        .studio-template-art img {
+            transition: none;
         }
     }
-
 </style>
+
 @endpush
 
 @push('scripts')
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | ELEMENT HALAMAN
+    |--------------------------------------------------------------------------
+    */
 
     const cards = Array.from(
         document.querySelectorAll('.studio-template')
@@ -1375,58 +1549,69 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('.studio-filter')
     );
 
+    const classSelect = document.getElementById('studioClass');
     const levelFilter = document.getElementById('studioLevel');
     const searchInput = document.getElementById('studioSearch');
-    const classSelect = document.getElementById('studioClass');
 
-    const materialsSection =
-        document.getElementById('studioMaterials');
+    const materialsSection = document.getElementById(
+        'studioMaterials'
+    );
 
-    const evaluationsSection =
-        document.getElementById('studioEvaluations');
+    const evaluationsSection = document.getElementById(
+        'studioEvaluations'
+    );
 
-    const emptyState = document.getElementById('studioEmpty');
+    const emptyState = document.getElementById(
+        'studioEmpty'
+    );
 
     const modal = document.getElementById('studioModal');
 
-    const modalMascot =
-        document.getElementById('studioModalMascot');
+    const modalMascot = document.getElementById(
+        'studioModalMascot'
+    );
 
-    const modalType =
-        document.getElementById('studioModalType');
+    const modalType = document.getElementById(
+        'studioModalType'
+    );
 
-    const modalTitle =
-        document.getElementById('studioModalTitle');
+    const modalTitle = document.getElementById(
+        'studioModalTitle'
+    );
 
-    const modalDescription =
-        document.getElementById('studioModalDescription');
+    const modalDescription = document.getElementById(
+        'studioModalDescription'
+    );
 
-    const modalExample =
-        document.getElementById('studioModalExample');
+    const modalExample = document.getElementById(
+        'studioModalExample'
+    );
 
-    const modalFields =
-        document.getElementById('studioModalFields');
+    const modalFields = document.getElementById(
+        'studioModalFields'
+    );
 
-    const selectedBar =
-        document.getElementById('studioSelected');
+    const modalNote = document.getElementById(
+        'studioModalNote'
+    );
 
-    const selectedName =
-        document.getElementById('studioSelectedName');
-
-    const selectedClass =
-        document.getElementById('studioSelectedClass');
+    const chooseButton = document.getElementById(
+        'studioChoose'
+    );
 
     let activeType = 'semua';
     let currentCard = null;
-    let chosenCard = null;
 
-    // ==========================
-    // FILTER TEMPLATE
-    // ==========================
+    /*
+    |--------------------------------------------------------------------------
+    | 1. FILTER TEMPLATE
+    |--------------------------------------------------------------------------
+    */
 
     function applyFilters() {
 
         const level = levelFilter.value;
+
         const keyword = searchInput.value
             .trim()
             .toLowerCase();
@@ -1439,26 +1624,26 @@ document.addEventListener('DOMContentLoaded', function () {
             const type = card.dataset.type;
             const levels = card.dataset.levels.split(',');
 
-            const searchText = (
+            const searchableText = (
                 card.dataset.title + ' ' +
                 card.dataset.description
             ).toLowerCase();
 
-            const typeMatches =
+            const matchType =
                 activeType === 'semua' ||
                 activeType === type;
 
-            const levelMatches =
+            const matchLevel =
                 level === 'semua' ||
                 levels.includes(level);
 
-            const searchMatches =
-                searchText.includes(keyword);
+            const matchSearch =
+                searchableText.includes(keyword);
 
             const visible =
-                typeMatches &&
-                levelMatches &&
-                searchMatches;
+                matchType &&
+                matchLevel &&
+                matchSearch;
 
             card.hidden = !visible;
 
@@ -1475,23 +1660,27 @@ document.addEventListener('DOMContentLoaded', function () {
         evaluationsSection.hidden = evaluationCount === 0;
 
         emptyState.hidden =
-            materialCount + evaluationCount > 0;
+            (materialCount + evaluationCount) > 0;
     }
 
     filters.forEach(button => {
 
         button.addEventListener('click', function () {
 
-            activeType = this.dataset.filter;
+            activeType = button.dataset.filter;
 
             filters.forEach(item => {
-                const active = item === this;
 
-                item.classList.toggle('active', active);
+                const selected = item === button;
+
+                item.classList.toggle(
+                    'active',
+                    selected
+                );
 
                 item.setAttribute(
                     'aria-pressed',
-                    String(active)
+                    String(selected)
                 );
             });
 
@@ -1500,15 +1689,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     levelFilter.addEventListener('change', applyFilters);
+
     searchInput.addEventListener('input', applyFilters);
 
-    // ==========================
-    // DETAIL TEMPLATE
-    // ==========================
+    /*
+    |--------------------------------------------------------------------------
+    | 2. BUKA MODAL TEMPLATE
+    |--------------------------------------------------------------------------
+    */
 
     function openTemplate(card) {
 
         currentCard = card;
+
+        const type = card.dataset.type;
+        const editorUrl = card.dataset.editorUrl;
 
         modalMascot.src = card.dataset.mascot;
 
@@ -1516,7 +1711,7 @@ document.addEventListener('DOMContentLoaded', function () {
             'Maskot ' + card.dataset.title;
 
         modalType.textContent =
-            card.dataset.type === 'materi'
+            type === 'materi'
                 ? '📖 TEMPLATE MATERI'
                 : '📝 TEMPLATE EVALUASI';
 
@@ -1529,18 +1724,84 @@ document.addEventListener('DOMContentLoaded', function () {
         modalExample.textContent =
             card.dataset.example;
 
+        // Bersihkan daftar sebelum memuat data baru.
         modalFields.replaceChildren();
 
         const fields = card.dataset.fields.split('|');
 
         fields.forEach(field => {
+
             const li = document.createElement('li');
+
             li.textContent = field;
+
             modalFields.appendChild(li);
         });
 
+        /*
+        | Tentukan apakah template dapat digunakan.
+        */
+
+       
+            if (type === 'evaluasi') {
+
+                chooseButton.disabled = true;
+
+                chooseButton.textContent =
+                    'Editor Evaluasi Belum Tersedia';
+
+                modalNote.textContent =
+                    'Template evaluasi ini bisa dilihat, tetapi editor ' +
+                    'pembuatan soal belum tersedia.';
+
+            } else if (card.dataset.id === 'coding' && editorUrl) {
+
+                // Khusus Praktik Coding Python.
+                chooseButton.disabled = false;
+
+                chooseButton.textContent =
+                    'Lihat Contoh Praktik Coding →';
+
+                modalNote.textContent =
+                    'Buka latihan Coding Python asli CodePawth, ' +
+                    'lengkap dengan mini flowchart, editor, ' +
+                    'simulasi output, dan skor. ' +
+                    'Editor soal khusus Guru belum dibuat.';
+
+            } else if (!editorUrl) {
+
+                chooseButton.disabled = true;
+
+                chooseButton.textContent =
+                    'Editor Materi Belum Terhubung';
+
+                modalNote.textContent =
+                    'Route editor materi belum tersedia. ' +
+                    'Periksa route guru.materi.create.';
+
+            } else {
+
+                // Flashcard dan Tulisan + Gambar.
+                chooseButton.disabled = false;
+
+                chooseButton.textContent =
+                    'Gunakan Template Ini →';
+
+                modalNote.textContent =
+                    'Buka editor Guru untuk mengisi materi, ' +
+                    'melihat pratinjau, dan menyimpan hasilnya.';
+
+            }
+
+
         modal.showModal();
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. KLIK KARTU TEMPLATE
+    |--------------------------------------------------------------------------
+    */
 
     cards.forEach(card => {
 
@@ -1549,92 +1810,104 @@ document.addEventListener('DOMContentLoaded', function () {
         );
 
         button.addEventListener('click', function () {
+
             openTemplate(card);
+
         });
     });
 
-    // ==========================
-    // PILIH TEMPLATE
-    // ==========================
+    /*
+    |--------------------------------------------------------------------------
+    | 4. PILIH TEMPLATE MATERI
+    |--------------------------------------------------------------------------
+    */
 
-    function updateSelectedClass() {
-
-        if (!chosenCard) return;
-
-        const chosenOption =
-            classSelect.options[classSelect.selectedIndex];
-
-        selectedClass.textContent = classSelect.value
-            ? 'Kelas tujuan: ' + chosenOption.textContent.trim()
-            : 'Belum memilih kelas · Bisa ditentukan nanti';
-    }
-
-    document.getElementById('studioChoose')
-        .addEventListener('click', function () {
+    
+        chooseButton.addEventListener('click', function () {
 
             if (!currentCard) return;
 
-            chosenCard = currentCard;
+            const templateId = currentCard.dataset.id;
+            const templateType = currentCard.dataset.type;
+            const editorUrl = currentCard.dataset.editorUrl;
 
-            cards.forEach(card => {
-                card.classList.toggle(
-                    'is-selected',
-                    card === chosenCard
+            // Evaluasi belum memiliki editor.
+            if (templateType !== 'materi') {
+                return;
+            }
+
+            if (!editorUrl) {
+                return;
+            }
+
+            // =====================================
+            // TEMPLATE PRAKTIK CODING PYTHON
+            // =====================================
+
+            if (templateId === 'coding') {
+
+                // Buka contoh Coding Python bawaan.
+                // Tidak memakai editor Guru atau class_id.
+                window.location.assign(editorUrl);
+
+                return;
+            }
+
+            // =====================================
+            // TEMPLATE FLASHCARD DAN ARTIKEL
+            // =====================================
+
+            const url = new URL(
+                editorUrl,
+                window.location.origin
+            );
+
+            // Kirim kelas yang dipilih ke editor Guru.
+            if (classSelect.value) {
+
+                url.searchParams.set(
+                    'class_id',
+                    classSelect.value
                 );
-            });
 
-            selectedName.textContent =
-                chosenCard.dataset.title;
+            }
 
-            selectedBar.hidden = false;
+            window.location.assign(url.toString());
 
-            updateSelectedClass();
-
-            modal.close();
-
-            selectedBar.scrollIntoView({
-                behavior: window.matchMedia(
-                    '(prefers-reduced-motion: reduce)'
-                ).matches ? 'auto' : 'smooth',
-                block: 'center'
-            });
         });
 
-    classSelect.addEventListener(
-        'change',
-        updateSelectedClass
-    );
-
-    document.getElementById('studioClearSelection')
-        .addEventListener('click', function () {
-
-            chosenCard = null;
-
-            cards.forEach(card => {
-                card.classList.remove('is-selected');
-            });
-
-            selectedBar.hidden = true;
-        });
-
-    // ==========================
-    // TUTUP MODAL
-    // ==========================
+    /*
+    |--------------------------------------------------------------------------
+    | 5. TUTUP MODAL
+    |--------------------------------------------------------------------------
+    */
 
     document.getElementById('studioModalClose')
-        .addEventListener('click', () => modal.close());
+        .addEventListener('click', function () {
+            modal.close();
+        });
 
     document.getElementById('studioCancel')
-        .addEventListener('click', () => modal.close());
+        .addEventListener('click', function () {
+            modal.close();
+        });
 
     modal.addEventListener('click', function (event) {
+
         if (event.target === modal) {
             modal.close();
         }
     });
 
+    /*
+    |--------------------------------------------------------------------------
+    | 6. JALANKAN FILTER AWAL
+    |--------------------------------------------------------------------------
+    */
+
     applyFilters();
 
 });
 </script>
+
 @endpush
