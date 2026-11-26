@@ -134,8 +134,8 @@
     <div class="relative w-full min-h-full overflow-x-hidden">
 
         <!-- =====================================================================
-                 DEKORASI BACKGROUND (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
-            ====================================================================== -->
+                             DEKORASI BACKGROUND (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
+                        ====================================================================== -->
         <div class="pointer-events-none select-none absolute inset-0 overflow-hidden z-0">
             <!-- Blob Besar Pastel -->
             <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-200/45 blur-3xl"></div>
@@ -199,8 +199,8 @@
         </div>
 
         <!-- =====================================================================
-                 KONTEN UTAMA STUDIO KONTEN GURU
-            ====================================================================== -->
+                             KONTEN UTAMA STUDIO KONTEN GURU
+                        ====================================================================== -->
         <div class="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-6 space-y-6">
 
             {{-- BREADCRUMB --}}
@@ -318,7 +318,7 @@
                 </div>
 
                 <div class="relative z-10 shrink-0">
-                    <img src="{{ asset('images/mascot_class.png') }}" alt="Maskot CodePawth sedang menggunakan laptop"
+                    <img src="{{ asset('images/guru_konten.png') }}" alt="Maskot CodePawth sedang menggunakan laptop"
                         class="w-36 h-36 sm:w-44 sm:h-44 object-contain drop-shadow-sm">
                 </div>
             </section>
@@ -340,7 +340,7 @@
                 </svg>
 
                 <div class="relative z-10 flex items-center gap-4">
-                    <img src="{{ asset('images/mascot_kelas.png') }}" alt="Maskot Kelas"
+                    <img src="{{ asset('images/guru_think.png') }}" alt="Maskot Kelas"
                         class="w-14 h-14 object-contain shrink-0 drop-shadow-2xs">
 
                     <div>
@@ -425,7 +425,7 @@
                     </p>
                 </div>
 
-                <img src="{{ asset('images/mascot_peeking.png') }}" alt="Maskot mengintip pilihan template"
+                <img src="{{ asset('images/guru_peek.png') }}" alt="Maskot mengintip pilihan template"
                     class="w-24 h-24 object-contain self-end shrink-0 drop-shadow-xs">
             </div>
 

@@ -39,41 +39,7 @@ class MateriController extends Controller
         return $this->showDemoMaterial('evaluasi', $request);
     }
 
-    public function knowledgeCard(): View
-    {
-        $demoClass = LearningClass::query()
-            ->where('join_code', self::DEMO_CLASS_CODE)
-            ->first();
-
-        $materials = $demoClass
-            ? LearningMaterial::query()
-                ->where('learning_class_id', $demoClass->id)
-                ->where('status', 'published')
-                ->where('type', 'flashcard')
-                ->get()
-            : new Collection();
-
-        $knowledgeCardDecks = [];
-
-        foreach ($materials as $material) {
-            $levelId = (int) ($material->content['level_id'] ?? 0);
-            $deckKey = "{$material->level}-{$levelId}";
-            $deck = $this->makeFlashcardDeck($material);
-            $deck['jenjang'] = $material->level;
-            $deck['level'] = $levelId;
-            $knowledgeCardDecks[$deckKey] = $deck;
-        }
-
-        $demoDeck = $knowledgeCardDecks
-            ? reset($knowledgeCardDecks)
-            : ['levelTitle' => self::DEMO_CLASS_NAME, 'items' => []];
-
-        return view('knowledge-card', [
-            'demoDeck' => $demoDeck,
-            'knowledgeCardDecks' => $knowledgeCardDecks,
-        ]);
-    }
-
+    
     private function showDemoMaterial(string $type, Request $request): View
     {
         $rawJenjang = $request->query('jenjang', 'SD');
@@ -238,8 +204,8 @@ class MateriController extends Controller
 
     public function levelView(): View
     {
-        $user = Auth::user();
-        $canSaveProgress = $user?->isStudent() ?? false;
+       $user = Auth::user();
+$canSaveProgress = $user !== null && $user->role === 'murid';
         $demoClass = LearningClass::query()
             ->where('join_code', self::DEMO_CLASS_CODE)
             ->first();
@@ -352,6 +318,109 @@ class MateriController extends Controller
                 'score',
                 'stars',
             ]),
+        ]);
+    }
+
+    //------------------------------------------------
+    //             KNOWLEDGE CARD
+    //------------------------------------------------
+    public function knowledgeCard(): View
+    {
+        $user = Auth::user();
+        $canSaveProgress = $user !== null && $user->isStudent();
+
+        $knowledgeCardDecks = [];
+
+        // 1. Materi dari Kelas CodePawth (DEMOPWT)
+        $demoClass = LearningClass::query()
+            ->where('join_code', self::DEMO_CLASS_CODE)
+            ->first();
+
+        if ($demoClass) {
+            $demoMaterials = LearningMaterial::query()
+                ->where('learning_class_id', $demoClass->id)
+                ->where('status', 'published')
+                ->whereIn('type', ['flashcard', 'flowchart', 'coding'])
+                ->get();
+
+            foreach ($demoMaterials->where('type', 'flashcard') as $material) {
+                $jenjang = strtoupper($material->level);
+                $levelId = (int) ($material->content['level_id'] ?? 0);
+                $deckKey = self::DEMO_CLASS_CODE . "-{$jenjang}-{$levelId}";
+
+                $deck = $this->makeFlashcardDeck($material);
+                $deck['sourceType'] = 'codepawth';
+                $deck['classCode'] = self::DEMO_CLASS_CODE;
+                $deck['className'] = 'Kelas CodePawth';
+                $deck['jenjang'] = $jenjang;
+                $deck['level'] = $levelId;
+                $deck['hasFlowchart'] = $this->findMaterial(
+                    $demoMaterials->where('level', $jenjang),
+                    'flowchart',
+                    $levelId
+                ) !== null;
+                $deck['hasCoding'] = $this->findMaterial(
+                    $demoMaterials->where('level', $jenjang),
+                    'coding',
+                    $levelId
+                ) !== null;
+
+                $knowledgeCardDecks[$deckKey] = $deck;
+            }
+        }
+
+        // 2. Materi dari Kelas yang Di-join Murid
+        if ($canSaveProgress) {
+            $joinedClasses = $user->joinedClasses()
+                ->where('join_code', '!=', self::DEMO_CLASS_CODE)
+                ->get();
+
+            if ($joinedClasses->isNotEmpty()) {
+                $joinedMaterials = LearningMaterial::query()
+                    ->whereIn('learning_class_id', $joinedClasses->pluck('id'))
+                    ->where('status', 'published')
+                    ->whereIn('type', ['flashcard', 'flowchart', 'coding'])
+                    ->get();
+
+                foreach ($joinedClasses as $jClass) {
+                    $classMaterials = $joinedMaterials->where('learning_class_id', $jClass->id);
+
+                    foreach ($classMaterials->where('type', 'flashcard') as $index => $material) {
+                        $jenjang = strtoupper($material->level ?: ($jClass->level ?: 'SD'));
+                        $levelId = (int) ($material->content['level_id'] ?? ($index + 1));
+                        $deckKey = "{$jClass->join_code}-{$jenjang}-{$levelId}";
+
+                        $deck = $this->makeFlashcardDeck($material);
+                        $deck['sourceType'] = 'joined';
+                        $deck['classCode'] = $jClass->join_code;
+                        $deck['className'] = $jClass->name;
+                        $deck['jenjang'] = $jenjang;
+                        $deck['level'] = $levelId;
+                        $deck['hasFlowchart'] = $this->findMaterial($classMaterials, 'flowchart', $levelId) !== null;
+                        $deck['hasCoding'] = $this->findMaterial($classMaterials, 'coding', $levelId) !== null;
+
+                        $knowledgeCardDecks[$deckKey] = $deck;
+                    }
+                }
+            }
+        }
+
+        // 3. Ambil semua progres murid dari database (baik DEMOPWT maupun kelas yang di-join)
+        $serverProgress = $canSaveProgress
+            ? $user
+                ->studentLevelProgresses()
+                ->get(['class_code', 'jenjang', 'level_id', 'score', 'stars'])
+            : collect();
+
+        $demoDeck = $knowledgeCardDecks
+            ? reset($knowledgeCardDecks)
+            : ['levelTitle' => self::DEMO_CLASS_NAME, 'items' => []];
+
+        return view('knowledge-card', [
+            'canSaveProgress' => $canSaveProgress,
+            'serverProgress' => $serverProgress,
+            'demoDeck' => $demoDeck,
+            'knowledgeCardDecks' => $knowledgeCardDecks,
         ]);
     }
 }

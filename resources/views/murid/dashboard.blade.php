@@ -16,8 +16,8 @@
     <div class="relative w-full min-h-full overflow-x-hidden">
 
         <!-- =====================================================================
-             DEKORASI BACKGROUND (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
-        ====================================================================== -->
+                             DEKORASI BACKGROUND (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
+                        ====================================================================== -->
         <div class="pointer-events-none select-none absolute inset-0 overflow-hidden z-0" aria-hidden="true">
             <!-- Blob Besar Pastel -->
             <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-200/45 blur-3xl"></div>
@@ -76,8 +76,8 @@
         </div>
 
         <!-- =====================================================================
-             KONTEN UTAMA DASHBOARD SISWA
-        ====================================================================== -->
+                             KONTEN UTAMA DASHBOARD SISWA
+                        ====================================================================== -->
         <div class="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-6 space-y-6">
 
             {{-- NOTIFIKASI SUKSES / ERROR VALIDASI --}}
@@ -310,8 +310,8 @@
                             </p>
                         </div>
 
-                        <img src="{{ asset('images/mascot_kelas.png') }}" alt="Maskot Gabung Kelas"
-                            class="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 drop-shadow-2xs">
+                        <img src="{{ asset('images/mascot_join.png') }}" alt="Maskot Gabung Kelas"
+                            class="w-24 h-24 sm:w-32 sm:h-32 object-contain shrink-0 drop-shadow-2xs">
                     </div>
 
                     <form method="POST" action="{{ route('murid.kelas.join') }}" class="relative z-10 space-y-3">

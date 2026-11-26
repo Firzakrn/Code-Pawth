@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StudentLevelProgress extends Model
 {
+    protected $table = 'student_level_progresses';
+
     protected $fillable = [
         'user_id',
         'class_code',
@@ -20,9 +22,6 @@ class StudentLevelProgress extends Model
     protected function casts(): array
     {
         return [
-            'level_id' => 'integer',
-            'score' => 'integer',
-            'stars' => 'integer',
             'completed_at' => 'datetime',
         ];
     }

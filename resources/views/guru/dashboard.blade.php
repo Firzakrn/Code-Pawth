@@ -6,8 +6,8 @@
     <div class="relative w-full min-h-full overflow-x-hidden">
 
         <!-- =====================================================================
-                     DEKORASI BACKGROUND RAMAI (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
-                ====================================================================== -->
+                             DEKORASI BACKGROUND RAMAI (BLOB, AWAN, PAW KUCING BESAR, & BINTANG)
+                        ====================================================================== -->
         <div class="pointer-events-none select-none absolute inset-0 overflow-hidden z-0">
             <!-- Blob Besar Pastel -->
             <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-200/45 blur-3xl"></div>
@@ -73,8 +73,8 @@
         </div>
 
         <!-- =====================================================================
-                     KONTEN UTAMA DASHBOARD GURU
-                ====================================================================== -->
+                             KONTEN UTAMA DASHBOARD GURU
+                        ====================================================================== -->
         <div class="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 py-6 space-y-6">
 
             <!-- HEADER SAPAAN GURU & MASKOT KANAN ATAS -->
@@ -123,14 +123,14 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <img src="{{ asset('images/mascot_dashboard.png') }}" alt="Maskot CodePawth"
+                    <img src="{{ asset('images/guru_cheers.png') }}" alt="Maskot CodePawth"
                         class="w-20 h-20 object-contain drop-shadow-xs">
                 </div>
             </div>
 
             <!-- =====================================================================
-                         MENU UTAMA (BUAT KELAS BARU & STUDIO KONTEN GURU)
-                    ====================================================================== -->
+                                 MENU UTAMA (BUAT KELAS BARU & STUDIO KONTEN GURU)
+                            ====================================================================== -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {{-- BUAT KELAS --}}
@@ -312,8 +312,8 @@
             </div>
 
             <!-- =====================================================================
-                         DAFTAR KELAS SAYA
-                    ====================================================================== -->
+                                 DAFTAR KELAS SAYA
+                            ====================================================================== -->
             <section
                 class="bg-white/95 backdrop-blur-sm rounded-3xl border border-white shadow-soft-card p-6 sm:p-7 relative overflow-hidden">
                 <!-- Dekorasi Awan Besar di Bawah Kartu Kelas Saya -->

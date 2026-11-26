@@ -124,6 +124,12 @@
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     {{ Auth::user()->name }}
                 </span>
+            @elseif (Auth::check())
+                <span
+                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-indigo-100 text-xs font-semibold text-indigo-700 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                    Mode Pratinjau Guru ({{ Auth::user()->name }})
+                </span>
             @else
                 <span
                     class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-100 text-xs font-semibold text-slate-600 shadow-2xs">
@@ -499,6 +505,95 @@
 
 @push('scripts')
     <script>
+        const progressStoreUrl = @json(route('materi.progress.store'));
+        const csrfToken = @json(csrf_token());
+
+        async function syncGuestProgressToServer() {
+            if (!canSaveProgress) return;
+
+            const guestStoreKey = 'codepawth_guest_progress';
+            let guestStore = null;
+
+            try {
+                const raw = localStorage.getItem(guestStoreKey);
+                if (!raw) return;
+                guestStore = JSON.parse(raw);
+            } catch (_) {
+                return;
+            }
+
+            if (!guestStore || typeof guestStore !== 'object') return;
+
+            const pendingEntries = [];
+            Object.entries(guestStore).forEach(([jKey, levelsObj]) => {
+                const jUpper = String(jKey).toUpperCase();
+                if (!levelsObj || typeof levelsObj !== 'object') return;
+
+                Object.entries(levelsObj).forEach(([lvlKey, info]) => {
+                    const lvlId = Number(lvlKey);
+                    const score = Number(info?.score ?? 0);
+                    const stars = Number(info?.stars ?? 0);
+                    if (!info?.completed && score < 80) return;
+
+                    const existing = serverProgress.find(
+                        item => String(item.jenjang).toUpperCase() === jUpper && Number(item.level_id) === lvlId
+                    );
+
+                    if (!existing || score > Number(existing.score || 0) || stars > Number(existing.stars || 0)) {
+                        pendingEntries.push({
+                            jenjang: jUpper,
+                            level_id: lvlId,
+                            score: Math.max(score, 80),
+                            stars: Math.max(stars, 2)
+                        });
+                    }
+                });
+            });
+
+            if (pendingEntries.length === 0) {
+                localStorage.removeItem(guestStoreKey);
+                return;
+            }
+
+            let allSynced = true;
+            for (const entry of pendingEntries) {
+                try {
+                    const res = await fetch(progressStoreUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        body: JSON.stringify(entry)
+                    });
+
+                    if (res.ok) {
+                        const idx = serverProgress.findIndex(
+                            item => String(item.jenjang).toUpperCase() === entry.jenjang && Number(item.level_id) === entry.level_id
+                        );
+                        if (idx >= 0) {
+                            serverProgress[idx] = {
+                                ...serverProgress[idx],
+                                score: Math.max(Number(serverProgress[idx].score || 0), entry.score),
+                                stars: Math.max(Number(serverProgress[idx].stars || 0), entry.stars)
+                            };
+                        } else {
+                            serverProgress.push(entry);
+                        }
+                    } else {
+                        allSynced = false;
+                    }
+                } catch (_) {
+                    allSynced = false;
+                }
+            }
+
+            if (allSynced) {
+                localStorage.removeItem(guestStoreKey);
+            }
+        }
+
         const serverProgress = @json($serverProgress ?? []);
         const canSaveProgress = @json($canSaveProgress ?? false);
 
@@ -679,6 +774,11 @@
                 };
             });
         }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            await syncGuestProgressToServer();
+            loadJenjangState(activeJenjang);
+        });
 
         function loadJenjangState(jenjang) {
             const baseLevels = demoLevels[jenjang] || [];
