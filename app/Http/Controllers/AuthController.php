@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classroom;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -36,6 +37,9 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        // Masukkan murid ke Kelas Demo jika belum tergabung ke kelas mana pun
+        $this->enrollDemoClassIfNeeded(Auth::user());
 
         return redirect()->route('dashboard');
     }
@@ -89,6 +93,9 @@ class AuthController extends Controller
 
         Auth::login($user);
 
+        // Masukkan murid baru ke Kelas Demo CodePawth secara otomatis
+        $this->enrollDemoClassIfNeeded($user);
+
         $request->session()->regenerate();
 
         return redirect()
@@ -104,5 +111,29 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('home');
+    }
+
+    /**
+     * Otomatis daftarkan murid ke Kelas Demo CodePawth (kode: DEMO-PAWTH)
+     * apabila belum bergabung ke kelas guru mana pun.
+     */
+    private function enrollDemoClassIfNeeded(?User $user): void
+    {
+        if (!$user || $user->role !== 'murid') {
+            return;
+        }
+
+        if ($user->joinedClasses()->count() === 0) {
+            $demoClass = Classroom::firstOrCreate(
+                ['code' => 'DEMO-PAWTH'],
+                [
+                    'name' => 'Kelas Demo CodePawth',
+                    'level' => 'SMP',
+                    'teacher_id' => User::where('role', 'guru')->value('id') ?? $user->id,
+                ]
+            );
+
+            $user->joinedClasses()->syncWithoutDetaching([$demoClass->id]);
+        }
     }
 }

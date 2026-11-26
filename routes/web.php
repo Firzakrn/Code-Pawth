@@ -351,16 +351,72 @@ Route::middleware('auth')
 
                 })->name('studio');
 
+                /*
+                |------------------------------------------------------
+                | REKAP NILAI SISWA
+                |------------------------------------------------------
+                */
+
+                Route::get('/rekap-nilai', function () {
+
+                    $classes = auth()->user()
+                        ->teachingClasses()
+                        ->orderBy('name')
+                        ->get();
+
+                    return view('guru.rekap-nilai', [
+                        'classes' => $classes,
+                    ]);
+
+                })->name('rekap-nilai');
+
             });
 
+            
 
-        /*
+
+   /*
         |--------------------------------------------------------------------------
-        | 7. PENGATURAN AKUN
+        | 7. PENGATURAN AKUN (HANYA PENGGUNA LOGIN)
         |--------------------------------------------------------------------------
         */
 
         Route::view('/pengaturan', 'pengaturan')
             ->name('pengaturan');
+
+        Route::put('/pengaturan', function (\Illuminate\Http\Request $request) {
+            $user = auth()->user();
+
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+                'jenjang' => ['nullable', 'in:SD,SMP,SMA'],
+            ]);
+
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+
+            if ($user->role === 'murid' && isset($validated['jenjang'])) {
+                session(['jenjang' => $validated['jenjang']]);
+                if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'jenjang')) {
+                    $user->jenjang = $validated['jenjang'];
+                }
+            }
+
+            $user->save();
+
+            return back()->with('status', 'Perubahan profil berhasil disimpan!');
+        })->name('pengaturan.update');
+
+        Route::delete('/akun/hapus', function (\Illuminate\Http\Request $request) {
+            $user = auth()->user();
+            auth()->logout();
+            $user->delete();
+
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect('/')->with('status', 'Akun berhasil dihapus permanen.');
+        })->name('akun.hapus');
 
     });
