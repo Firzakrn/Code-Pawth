@@ -1,5 +1,9 @@
 @extends('layouts.materi')
 
+@php
+    $evalPairCount = intdiv(count($demoDeck['items'] ?? []), 2);
+@endphp
+
 @section('title', 'Evaluasi Mencocokkan — Code Pawth')
 @section('materi_step', 'evaluasi')
 @section('materi_speech', 'Ayo cocokkan pasangan kartunya!')
@@ -47,7 +51,8 @@
                     class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300"
                     style="width: 0%;"></div>
             </div>
-            <span id="ev-pair-counter" class="text-xs font-extrabold text-slate-700 w-12 text-right">0 / 4</span>
+            <span id="ev-pair-counter" class="text-xs font-extrabold text-slate-700 w-12 text-right">0 /
+                {{ $evalPairCount }}</span>
         </div>
     </div>
 @endsection
@@ -148,6 +153,12 @@
                 <p id="modal-result-desc" class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
                     Kamu berhasil mencocokkan semua kartu dengan tepat!
                 </p>
+                @if (($isDemoPreview ?? false) && !($canSaveProgress ?? false))
+                    <a id="demo-progress-login" href="{{ route('login') }}"
+                        class="hidden mt-2 text-sm font-bold text-blue-600 hover:text-blue-700">
+                        Masuk untuk menyimpan progres
+                    </a>
+                @endif
             </div>
 
             <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-around">
@@ -158,7 +169,8 @@
                 <div class="w-px h-8 bg-slate-200"></div>
                 <div>
                     <span class="block text-[11px] text-slate-400 font-semibold">Benar</span>
-                    <span id="modal-correct-count" class="text-xl font-extrabold text-emerald-600">4 / 4</span>
+                    <span id="modal-correct-count" class="text-xl font-extrabold text-emerald-600">0 /
+                        {{ $evalPairCount }}</span>
                 </div>
             </div>
 
@@ -440,7 +452,7 @@
             return [1, 2, 3].map(i => starSvg(i <= stars)).join('');
         }
 
-        function checkAllAnswers(isTimeout = false) {
+        async function checkAllAnswers(isTimeout = false) {
             if (isChecked) return;
             clearInterval(timerInterval);
             isChecked = true;
@@ -469,19 +481,43 @@
             const mascotSpeech = document.getElementById('materi-mascot-speech');
             const modalMascotImg = document.getElementById('modal-result-mascot');
 
+            let progressNotice = '';
+
             if (score >= 80) {
-                saveLevelCompletion(jenjang, levelId, score, stars);
+                try {
+                    const saveMode = await saveLevelCompletion(jenjang, levelId, score, stars);
+                    if (saveMode === 'account') {
+                        progressNotice = 'Progres berhasil disimpan ke akunmu. Level berikutnya sudah terbuka!';
+                    } else if (saveMode === 'guest') {
+                        progressNotice =
+                            'Progres tersimpan di perangkat ini (Mode Tamu). Level berikutnya sudah terbuka!';
+                    }
+                } catch (error) {
+                    progressNotice =
+                        'Skor berhasil dihitung, tetapi progres gagal disimpan. Coba lagi setelah koneksi pulih.';
+                    console.error('Gagal menyimpan progres:', error);
+                }
+
                 if (modalMascotImg) modalMascotImg.src = "{{ asset('images/mascot_happy.png') }}";
                 document.getElementById('modal-result-title').textContent = 'Selamat, Kamu Lulus!';
                 document.getElementById('modal-result-desc').textContent =
-                    'Semua tahapan belajar selesai! Level berikutnya di peta belajar sudah terbuka.';
+                    progressNotice || 'Semua tahapan belajar selesai! Level berikutnya di peta belajar sudah terbuka.';
                 if (mascotSpeech) mascotSpeech.textContent = 'Hebat! Kamu lulus evaluasi level ini!';
             } else {
                 if (modalMascotImg) modalMascotImg.src = "{{ asset('images/mascot_angry.png') }}";
-                document.getElementById('modal-result-title').textContent = isTimeout ? 'Waktu Habis!' : 'Hampir Berhasil!';
+                document.getElementById('modal-result-title').textContent = isTimeout ? 'Waktu Habis!' :
+                    'Hampir Berhasil!';
                 document.getElementById('modal-result-desc').textContent =
                     'Raih skor minimal 80 untuk membuka level berikutnya. Yuk coba cocokkan lagi!';
                 if (mascotSpeech) mascotSpeech.textContent = 'Jangan menyerah, ayo coba cocokkan lagi!';
+            }
+
+            if (
+                score >= 80 &&
+                window.MATERI_CTX.isDemoPreview &&
+                !window.MATERI_CTX.canSaveProgress
+            ) {
+                document.getElementById('demo-progress-login')?.classList.remove('hidden');
             }
 
             const modal = document.getElementById('eval-result-modal');
@@ -489,32 +525,94 @@
             modal.classList.add('flex');
         }
 
-        function saveLevelCompletion(jenjangName, lvlId, score, stars) {
-            const key = `codepawth_levels_${jenjangName.toLowerCase()}`;
-            const saved = JSON.parse(localStorage.getItem(key));
-            if (!Array.isArray(saved)) return;
+        async function saveLevelCompletion(jenjangName, lvlId, score, stars) {
+            // 1. Jika pengguna sudah login (akun siswa/guru), simpan ke database
+            if (window.MATERI_CTX.canSaveProgress) {
+                const response = await fetch(window.MATERI_CTX.progressStoreUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': window.MATERI_CTX.csrfToken
+                    },
+                    body: JSON.stringify({
+                        jenjang: jenjangName,
+                        level_id: lvlId,
+                        score,
+                        stars
+                    })
+                });
 
-            const updated = saved.map((lvl, idx) => {
-                if (lvl.id === lvlId) {
-                    return {
-                        ...lvl,
-                        status: 'done',
-                        score: Math.max(lvl.score || 0, score),
-                        stars: Math.max(lvl.stars || 0, stars),
-                        progress: 100
-                    };
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
                 }
-                const prevLvl = saved[idx - 1];
-                if (prevLvl && prevLvl.id === lvlId && lvl.status === 'locked') {
-                    return {
-                        ...lvl,
-                        status: 'active'
-                    };
-                }
-                return lvl;
-            });
 
-            localStorage.setItem(key, JSON.stringify(updated));
+                return 'account';
+            }
+
+            // 2. Mode Tamu: simpan progres ke localStorage agar level berikutnya terbuka di /level-view
+            const jUpper = String(jenjangName).toUpperCase();
+            const lNum = Number(lvlId);
+            const guestStoreKey = 'codepawth_guest_progress';
+
+            let guestStore = {};
+            try {
+                const raw = localStorage.getItem(guestStoreKey);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                        guestStore = parsed;
+                    }
+                }
+            } catch (_) {
+                guestStore = {};
+            }
+
+            if (!guestStore[jUpper] || typeof guestStore[jUpper] !== 'object') {
+                guestStore[jUpper] = {};
+            }
+
+            const prev = guestStore[jUpper][String(lNum)] || {};
+            guestStore[jUpper][String(lNum)] = {
+                jenjang: jUpper,
+                level_id: lNum,
+                score: Math.max(Number(prev.score || 0), Number(score)),
+                stars: Math.max(Number(prev.stars || 0), Number(stars)),
+                completed: true,
+                updated_at: new Date().toISOString()
+            };
+
+            localStorage.setItem(guestStoreKey, JSON.stringify(guestStore));
+
+            // Sinkronkan juga jika format array lama kebetulan ada di localStorage
+            const legacyKey = `codepawth_levels_${jenjangName.toLowerCase()}`;
+            try {
+                const savedArray = JSON.parse(localStorage.getItem(legacyKey));
+                if (Array.isArray(savedArray)) {
+                    const updated = savedArray.map((lvl, idx) => {
+                        if (Number(lvl.id) === lNum) {
+                            return {
+                                ...lvl,
+                                status: 'done',
+                                score: Math.max(lvl.score || 0, score),
+                                stars: Math.max(lvl.stars || 0, stars),
+                                progress: 100
+                            };
+                        }
+                        const prevLvl = savedArray[idx - 1];
+                        if (prevLvl && Number(prevLvl.id) === lNum && lvl.status === 'locked') {
+                            return {
+                                ...lvl,
+                                status: 'active'
+                            };
+                        }
+                        return lvl;
+                    });
+                    localStorage.setItem(legacyKey, JSON.stringify(updated));
+                }
+            } catch (_) {}
+
+            return 'guest';
         }
 
         function closeResultModal() {
@@ -562,6 +660,20 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modal-continue-btn').href = levelViewUrl;
+            initEvaluation();
+
+            window.addEventListener('resize', drawConnectionLines);
+            document.getElementById('sidebar-toggle-btn')?.addEventListener('click', () => {
+                setTimeout(drawConnectionLines, 320);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const continueUrl = new URL(levelViewUrl, window.location.origin);
+            continueUrl.searchParams.set('jenjang', jenjang);
+            continueUrl.searchParams.set('level', levelId);
+            document.getElementById('modal-continue-btn').href = continueUrl.toString();
+
             initEvaluation();
 
             window.addEventListener('resize', drawConnectionLines);

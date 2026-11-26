@@ -54,6 +54,11 @@
 @endpush
 
 @section('content')
+    @php
+        $initialJenjang = strtoupper(request('jenjang', 'SD'));
+        $initialLevels = $demoLevels[$initialJenjang] ?? [];
+    @endphp
+
     <!-- Definisi SVG Paw Print Biru Natural -->
     <svg class="hidden" aria-hidden="true">
         <defs>
@@ -113,20 +118,28 @@
     <header class="relative z-10 px-5 sm:px-7 pt-3.5 pb-1 flex items-center justify-between shrink-0">
         <!-- User / Guest Status -->
         <div class="flex items-center gap-2.5">
-            <span
-                class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-100 text-xs font-semibold text-slate-600 shadow-2xs">
-                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                Mode Tamu Aktif
-            </span>
-            <a href="{{ url('auth') }}"
-                class="inline-flex items-center gap-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200/80 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-2xs transition-colors">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd"
-                        d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                        clip-rule="evenodd" />
-                </svg>
-                <span>Simpan Akun</span>
-            </a>
+            @if ($canSaveProgress ?? false)
+                <span
+                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-100 text-xs font-semibold text-slate-600 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                    {{ Auth::user()->name }}
+                </span>
+            @else
+                <span
+                    class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-blue-100 text-xs font-semibold text-slate-600 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    Mode Tamu Aktif
+                </span>
+                <a href="{{ route('login') }}"
+                    class="inline-flex items-center gap-1.5 bg-white hover:bg-blue-50 text-blue-600 border border-blue-200/80 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-2xs transition-colors">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span>Simpan Akun</span>
+                </a>
+            @endif
         </div>
     </header>
 
@@ -134,33 +147,76 @@
     <main class="relative z-10 flex-1 min-h-0 flex flex-col px-5 sm:px-7 pb-4 max-w-6xl w-full mx-auto gap-3">
 
         <!-- Banner Header Jenjang + Mascot Kanan Atas -->
-        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0">
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-3 shrink-0 z-30">
 
-            <!-- Kartu Jenjang -->
-            <div
-                class="bg-white/95 backdrop-blur-xs rounded-2xl border border-white shadow-soft-card px-4 py-2.5 flex items-center gap-3.5 max-w-md z-10">
-                <div
-                    class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shrink-0">
-                    <img src="{{ asset('images/mascot_class.png') }}" alt="Avatar Jenjang"
-                        class="w-10 h-10 object-contain">
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                        <h1 id="banner-jenjang-title" class="text-lg sm:text-xl font-extrabold text-slate-900">SD</h1>
-                        <span id="banner-level-count"
-                            class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
-                            5 Level
-                        </span>
+            <!-- Kartu Jenjang + Dropdown Ganti Jenjang -->
+            <div id="jenjang-dropdown-wrapper" class="relative max-w-md w-full z-30">
+                <button type="button" id="jenjang-dropdown-trigger" onclick="toggleJenjangDropdown()"
+                    aria-expanded="false" aria-haspopup="listbox"
+                    class="w-full text-left bg-white/95 hover:bg-white backdrop-blur-xs rounded-2xl border border-white hover:border-blue-200 shadow-soft-card px-4 py-2.5 flex items-center gap-3.5 transition-all cursor-pointer">
+                    <div
+                        class="w-11 h-11 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center overflow-hidden shrink-0">
+                        <img src="{{ asset('images/mascot_class.png') }}" alt="Avatar Jenjang"
+                            class="w-10 h-10 object-contain">
                     </div>
-                    <p id="banner-jenjang-subtitle" class="text-xs text-slate-500">Belajar dasar coding dengan cara yang
-                        seru!</p>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <h1 id="banner-jenjang-title" class="text-lg sm:text-xl font-extrabold text-slate-900">
+                                {{ $initialJenjang }}</h1>
+                            <span id="banner-level-count"
+                                class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold">
+                                {{ count($initialLevels) }} Level
+                            </span>
+                        </div>
+                        <p id="banner-jenjang-subtitle" class="text-xs text-slate-500 truncate">
+                            {{ count($initialLevels) }} level materi demo tersedia.
+                        </p>
+                    </div>
+                    <span
+                        class="p-1.5 rounded-lg text-slate-400 group-hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                        <svg id="jenjang-dropdown-chevron" class="w-4 h-4 transition-transform duration-200"
+                            fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </span>
+                </button>
+
+                <!-- Menu Dropdown Jenjang -->
+                <div id="jenjang-dropdown-menu" role="listbox"
+                    class="hidden absolute left-0 right-0 mt-2 bg-white rounded-2xl border border-blue-100 shadow-xl p-1.5 z-50 space-y-1">
+                    @php
+                        $jenjangMeta = [
+                            'SD' => 'Dasar Logika & Konsep Pemrograman',
+                            'SMP' => 'Algoritma, Flowchart & Dasar Kode',
+                            'SMA' => 'Flowchart ke Pemrograman Python',
+                        ];
+                    @endphp
+                    @foreach (['SD', 'SMP', 'SMA'] as $jKey)
+                        @php
+                            $jCount = count($demoLevels[$jKey] ?? []);
+                        @endphp
+                        <button type="button" role="option" data-jenjang-option="{{ $jKey }}"
+                            onclick="selectJenjangFromDropdown('{{ $jKey }}')"
+                            class="jenjang-option-btn w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between gap-3 transition-colors cursor-pointer hover:bg-blue-50/80 text-slate-700">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-extrabold text-sm">{{ $jKey }}</span>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold jenjang-option-badge">
+                                        {{ $jCount }} Level
+                                    </span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 truncate">{{ $jenjangMeta[$jKey] }}</p>
+                            </div>
+                            <svg class="w-4 h-4 text-blue-600 shrink-0 hidden jenjang-option-check" viewBox="0 0 24 24"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    @endforeach
                 </div>
-                <a href="{{ url('/') }}#jenjang-section" title="Ganti Jenjang"
-                    class="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                </a>
             </div>
 
             <!-- Speech Bubble & Maskot Kanan Atas -->
@@ -176,7 +232,7 @@
 
         <!-- Bar Progres & Bintang -->
         <div
-            class="bg-white/95 backdrop-blur-xs rounded-2xl border border-white shadow-soft-card px-5 py-2.5 sm:px-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0">
+            class="relative z-20 bg-white/95 backdrop-blur-xs rounded-2xl border border-white shadow-soft-card px-5 py-2.5 sm:px-6 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shrink-0">
 
             <div class="flex items-center gap-5 sm:gap-7">
                 <!-- Total Bintang -->
@@ -190,7 +246,7 @@
                     </div>
                     <div>
                         <div class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
-                            <span id="total-stars">3</span> / <span id="max-stars">15</span>
+                            <span id="total-stars">0</span> / <span id="max-stars">{{ count($initialLevels) * 3 }}</span>
                         </div>
                         <div class="text-[11px] text-slate-500 font-medium">Total Bintang</div>
                     </div>
@@ -209,7 +265,7 @@
                     </div>
                     <div>
                         <div id="active-level-title"
-                            class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Level 2</div>
+                            class="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">Level 1</div>
                         <div class="text-[11px] text-slate-500 font-medium">Penjelajah Pemula</div>
                     </div>
                 </div>
@@ -220,10 +276,10 @@
                 <div class="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                     <div id="progress-bar-fill"
                         class="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-500"
-                        style="width: 20%;"></div>
+                        style="width: 0%;"></div>
                 </div>
                 <span id="progress-percent"
-                    class="text-xs sm:text-sm font-extrabold text-slate-700 w-10 text-right">20%</span>
+                    class="text-xs sm:text-sm font-extrabold text-slate-700 w-10 text-right">0%</span>
             </div>
         </div>
 
@@ -283,35 +339,8 @@
                 </svg>
             </div>
 
-            <!-- Baris Kontrol Atas Peta (Switch Jenjang Dummy & Demo Progres) -->
-            <div class="relative z-20 flex flex-wrap items-center justify-between gap-2 shrink-0">
-                <div class="flex items-center gap-1.5 bg-white/90 p-1 rounded-full border border-blue-100 shadow-2xs">
-                    <span class="text-[11px] font-bold text-slate-400 pl-2 pr-1">Jenjang:</span>
-                    <button type="button" onclick="switchDummyJenjang('SD')" data-jenjang-btn="SD"
-                        class="jenjang-switch-btn text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-blue-600 text-white transition-colors cursor-pointer">SD
-                        (5)</button>
-                    <button type="button" onclick="switchDummyJenjang('SMP')" data-jenjang-btn="SMP"
-                        class="jenjang-switch-btn text-[11px] font-extrabold px-2.5 py-0.5 rounded-full text-slate-600 hover:bg-blue-50 transition-colors cursor-pointer">SMP
-                        (4)</button>
-                    <button type="button" onclick="switchDummyJenjang('SMA')" data-jenjang-btn="SMA"
-                        class="jenjang-switch-btn text-[11px] font-extrabold px-2.5 py-0.5 rounded-full text-slate-600 hover:bg-blue-50 transition-colors cursor-pointer">SMA
-                        (3)</button>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <button type="button" onclick="unlockAllDemo()"
-                        class="text-[11px] font-bold px-3 py-1 rounded-full bg-white/90 hover:bg-blue-600 text-blue-600 hover:text-white border border-blue-200 transition-colors cursor-pointer">
-                        Buka Semua (Demo)
-                    </button>
-                    <button type="button" onclick="resetDemoProgress()"
-                        class="text-[11px] font-bold px-3 py-1 rounded-full bg-white/90 hover:bg-slate-700 text-slate-600 hover:text-white border border-slate-200 transition-colors cursor-pointer">
-                        Reset
-                    </button>
-                </div>
-            </div>
-
             <!-- Container Peta Level -->
-            <div id="level-map-area" class="relative w-full flex-1 min-h-0 mt-1">
+            <div id="level-map-area" class="relative w-full flex-1 min-h-0">
 
                 <!-- Garis Jalur SVG Dinamis -->
                 <svg id="dynamic-path-svg" class="absolute inset-0 w-full h-full pointer-events-none z-0"
@@ -333,8 +362,8 @@
                 <div id="levels-container" class="relative w-full h-full z-10"></div>
 
                 <!-- PETI HARTA KARUN (SELESAI!) DI POJOK KANAN BAWAH -->
-                <div
-                    class="absolute right-2 sm:right-4 bottom-0 sm:bottom-1 flex flex-col items-center z-10 pointer-events-none">
+                <div id="level-map-finish"
+                    class="hidden absolute right-2 sm:right-4 bottom-0 sm:bottom-1 flex flex-col items-center z-10 pointer-events-none">
                     <div
                         class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-100/85 border-2 border-amber-300 flex items-center justify-center shadow-sm">
                         <svg class="w-9 h-9 sm:w-10 sm:h-10" viewBox="0 0 64 64" fill="none">
@@ -360,8 +389,8 @@
     </main>
 
     <!-- =====================================================================
-                                                                             SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
-                                                                        ====================================================================== -->
+             SLIDE-OVER DRAWER DARI KANAN (DETAIL INFO LEVEL, PROGRES & NILAI)
+        ====================================================================== -->
     <div id="drawer-backdrop" onclick="closeLevelDrawer()"
         class="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-40 hidden opacity-0 transition-opacity duration-300">
     </div>
@@ -376,11 +405,11 @@
                 <div class="flex items-center gap-2">
                     <span id="drawer-level-badge"
                         class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-extrabold tracking-wide">
-                        JENJANG SD • LEVEL 1
+                        Pilih level
                     </span>
                     <span id="drawer-status-badge"
                         class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold">
-                        Selesai
+                        -
                     </span>
                 </div>
 
@@ -440,7 +469,7 @@
                 <div>
                     <div class="flex justify-between text-xs font-semibold text-slate-500 mb-1.5">
                         <span>Ketuntasan Kartu & Kuis</span>
-                        <span id="drawer-cards-count">0 / 5 Selesai</span>
+                        <span id="drawer-cards-count">-</span>
                     </div>
                     <div class="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden">
                         <div id="drawer-progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-300"
@@ -470,248 +499,160 @@
 
 @push('scripts')
     <script>
-        // Data Dummy Murni Frontend (Otomatis menyesuaikan jumlah level per jenjang)
-        const dummyLevelsCatalog = {
-            SD: {
-                subtitle: 'Belajar dasar coding dengan cara yang seru!',
-                levels: [{
-                        id: 1,
-                        language: 'Tahap 1 • Python',
-                        title: 'Kenalan dengan Python',
-                        description: 'Memahami cara kerja bahasa pemrograman Python melalui Flashcard visual: mengenal perintah cetak teks, angka, dan urutan instruksi.',
-                        topics: [
-                            'Apa itu bahasa pemrograman Python?',
-                            'Menampilkan pesan dengan fungsi print()',
-                            'Evaluasi mencocokkan kartu sintaks dasar'
-                        ],
-                        status: 'done',
-                        score: 90,
-                        stars: 3,
-                        progress: 100,
-                        cardsDone: '5 / 5 Kartu',
-                        adaptiveNote: 'Tuntas tanpa remedial! Semua konsep dasar Python dikuasai.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 2,
-                        language: 'Tahap 1 • Python Lanjutan',
-                        title: 'Variabel & Operasi Hitung',
-                        description: 'Belajar menyimpan data di dalam variabel dan melakukan perhitungan matematika sederhana menggunakan kode Python.',
-                        topics: [
-                            'Mengenal kotak penyimpan data (Variabel)',
-                            'Tipe data teks (String) & angka (Integer)',
-                            'Tantangan mencocokkan hasil operasi hitung'
-                        ],
-                        status: 'active',
-                        score: 0,
-                        stars: 0,
-                        progress: 40,
-                        cardsDone: '2 / 5 Kartu',
-                        adaptiveNote: 'Sedang dipelajari. Selesaikan kartu evaluasi dengan nilai minimal 80.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 3,
-                        language: 'Tahap 2 • C++',
-                        title: 'Petualangan Dasar C++',
-                        description: 'Mengenal karakteristik bahasa C++ yang cepat dan terstruktur, serta membandingkan cara penulisan output-nya dengan Python.',
-                        topics: [
-                            'Struktur kerangka dasar program C++',
-                            'Perintah cout untuk menampilkan teks',
-                            'Kuis kartu perbandingan Python vs C++'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 5 Kartu',
-                        adaptiveNote: 'Terkunci. Raih nilai minimal 80% di Level 2 untuk membuka tahap C++.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 4,
-                        language: 'Tahap 3 • Java',
-                        title: 'Eksplorasi Sintaks Java',
-                        description: 'Berkenalan dengan bahasa pemrograman Java yang populer untuk aplikasi Android dan memahami aturan penulisan kodenya.',
-                        topics: [
-                            'Mengenal struktur class dan main di Java',
-                            'Mencetak output dengan System.out.println()',
-                            'Evaluasi kartu sintaks Java'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 5 Kartu',
-                        adaptiveNote: 'Terkunci. Selesaikan Level 3 terlebih dahulu.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 5,
-                        language: 'Evaluasi Akhir SD',
-                        title: 'Tantangan Multi-Bahasa & Bahasa Favorit',
-                        description: 'Ujian akhir jenjang SD untuk menguji ketelitian membedakan Python, C++, dan Java, sekaligus menentukan bahasa favoritmu menuju jenjang SMP!',
-                        topics: [
-                            'Evaluasi campuran kartu Python, C++, & Java',
-                            'Penentuan Profil Bahasa Favorit (Personalization Engine)',
-                            'Klaim Lencana Kelulusan Jenjang SD'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 6 Tantangan',
-                        adaptiveNote: 'Pilihan bahasa favoritmu di level ini akan mengatur contoh kode di jenjang SMA.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    }
-                ]
-            },
-            SMP: {
-                subtitle: 'Merangkai logika algoritma melalui diagram alir (Flowchart)!',
-                levels: [{
-                        id: 1,
-                        language: 'Level 1 • Simbol Flowchart',
-                        title: 'Mengenal Simbol Diagram Alir',
-                        description: 'Memahami fungsi simbol Terminator (Start/End), Process, Input/Output, dan Decision melalui kartu pengetahuan.',
-                        topics: [
-                            'Perbedaan bentuk oval, persegi panjang, dan belah ketupat',
-                            'Aturan arah garis alir (Flowline)',
-                            'Kuis identifikasi simbol flowchart'
-                        ],
-                        status: 'active',
-                        score: 0,
-                        stars: 0,
-                        progress: 20,
-                        cardsDone: '1 / 5 Kartu',
-                        adaptiveNote: 'Raih nilai minimal 80% untuk membuka tantangan flowchart rumpang.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 2,
-                        language: 'Level 2 • Flowchart Rumpang',
-                        title: 'Melengkapi Logika Percabangan',
-                        description: 'Mengisi bagian blok keputusan (Decision) yang hilang pada studi kasus penentuan kelulusan nilai.',
-                        topics: [
-                            'Menentukan kondisi Ya (True) dan Tidak (False)',
-                            'Melengkapi blok proses yang rumpang',
-                            'Validasi alur logika otomatis'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 4 Kasus',
-                        adaptiveNote: 'Terkunci. Selesaikan Level 1 SMP terlebih dahulu.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 3,
-                        language: 'Level 3 • Flowchart Builder',
-                        title: 'Menyusun Flowchart dari Instruksi',
-                        description: 'Merangkai blok flowchart dari nol berdasarkan studi kasus perhitungan diskon belanja.',
-                        topics: [
-                            'Menyusun urutan Start hingga End secara mandiri',
-                            'Menghubungkan cabang keputusan tanpa jalan buntu',
-                            'Pengecekan struktur Graph otomatis'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 3 Misi',
-                        adaptiveNote: 'Terkunci. Selesaikan Level 2 SMP terlebih dahulu.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 4,
-                        language: 'Evaluasi Akhir SMP',
-                        title: 'Ujian Logika Algoritma',
-                        description: 'Evaluasi menyeluruh membaca, memperbaiki, dan menyusun alur flowchart sebelum naik ke jenjang SMA.',
-                        topics: [
-                            'Studi kasus perbaikan alur yang salah (Debugging)',
-                            'Kuis komprehensif logika percabangan',
-                            'Lencana Kelulusan Jenjang SMP'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 5 Soal',
-                        adaptiveNote: 'Syarat lulus minimal nilai 75%.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    }
-                ]
-            },
-            SMA: {
-                subtitle: 'Menerjemahkan logika menjadi kode program nyata!',
-                levels: [{
-                        id: 1,
-                        language: 'Level 1 • Struktur Kontrol',
-                        title: 'Percabangan & Perulangan Kode',
-                        description: 'Mempelajari sintaks if-else dan perulangan (for/while) menggunakan bahasa favorit pilihanmu.',
-                        topics: [
-                            'Struktur kondisi if, elif/else if, dan else',
-                            'Konsep perulangan otomatis dengan loop',
-                            'Flashcard perbandingan kode'
-                        ],
-                        status: 'active',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 5 Kartu',
-                        adaptiveNote: 'Contoh kode menyesuaikan bahasa favoritmu.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 2,
-                        language: 'Level 2 • Flowchart ke Kode',
-                        title: 'Tantangan Live Coding',
-                        description: 'Menerjemahkan diagram flowchart di layar kiri menjadi program utuh di editor kode sebelah kanan.',
-                        topics: [
-                            'Membaca spesifikasi input dan output dari flowchart',
-                            'Menulis kode penyelesaian masalah',
-                            'Pengujian otomatis dengan 4 skenario Test Case'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 3 Tantangan',
-                        adaptiveNote: 'Terkunci. Selesaikan Level 1 SMA terlebih dahulu.',
-                        url: '{{ url('/materi/flashcard') }}'
-                    },
-                    {
-                        id: 3,
-                        language: 'Evaluasi Akhir SMA',
-                        title: 'Capstone Challenge & Rapor Kompetensi',
-                        description: 'Ujian akhir penyelesaian masalah pemrograman serta penerbitan Peta Kompetensi Digital.',
-                        topics: [
-                            'Analisis dan perbaikan bug pada kode program',
-                            'Studi kasus coding mandiri',
-                            'Lihat Rapor Kompetensi Akhir'
-                        ],
-                        status: 'locked',
-                        score: 0,
-                        stars: 0,
-                        progress: 0,
-                        cardsDone: '0 / 5 Tantangan',
-                        adaptiveNote: 'Syarat lulus minimal nilai 75%.',
-                        url: '{{ url('/materi/exam') }}'
-                    }
-                ]
-            }
-        };
+        const serverProgress = @json($serverProgress ?? []);
+        const canSaveProgress = @json($canSaveProgress ?? false);
+
+        const demoLevels = @json($demoLevels ?? []);
 
         const urlParams = new URLSearchParams(window.location.search);
-        let activeJenjang = (urlParams.get('jenjang') || 'SD').toUpperCase();
-        if (!dummyLevelsCatalog[activeJenjang]) activeJenjang = 'SD';
+        const initialUrlJenjang = (urlParams.get('jenjang') || '').toUpperCase();
+        const initialUrlLevel = Number(urlParams.get('level') || 0);
+        let hasConsumedUrlLevel = false;
+
+        let activeJenjang = initialUrlJenjang || 'SD';
+        if (!demoLevels[activeJenjang]?.length) {
+            activeJenjang = Object.keys(demoLevels).find(jenjang => demoLevels[jenjang].length > 0) || 'SD';
+        }
 
         let levelsData = [];
         let currentMascotLevel = 1;
         let isMascotRunning = false;
 
-        function getStorageKey(jenjang) {
-            return `codepawth_levels_${jenjang.toLowerCase()}`;
+        // =====================================================================
+        // DROPDOWN JENJANG DI KARTU HEADER
+        // =====================================================================
+        function toggleJenjangDropdown(forceState) {
+            const menu = document.getElementById('jenjang-dropdown-menu');
+            const trigger = document.getElementById('jenjang-dropdown-trigger');
+            const chevron = document.getElementById('jenjang-dropdown-chevron');
+            if (!menu || !trigger) return;
+
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : menu.classList.contains('hidden');
+            menu.classList.toggle('hidden', !shouldOpen);
+            trigger.setAttribute('aria-expanded', String(shouldOpen));
+            if (chevron) chevron.classList.toggle('rotate-180', shouldOpen);
+        }
+
+        function selectJenjangFromDropdown(jenjang) {
+            toggleJenjangDropdown(false);
+            switchJenjang(jenjang);
+
+            // Perbarui query parameter ?jenjang= di URL tanpa reload halaman
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set('jenjang', jenjang);
+            window.history.replaceState({}, '', nextUrl.toString());
+        }
+
+        document.addEventListener('click', (event) => {
+            const wrapper = document.getElementById('jenjang-dropdown-wrapper');
+            if (wrapper && !wrapper.contains(event.target)) {
+                toggleJenjangDropdown(false);
+            }
+        });
+
+        // =====================================================================
+        // BACA PROGRES MODE TAMU DARI LOCALSTORAGE
+        // =====================================================================
+        function getGuestLocalProgress(jenjang) {
+            const jUpper = String(jenjang).toUpperCase();
+            const jLower = String(jenjang).toLowerCase();
+            const resultMap = new Map();
+
+            const registerEntry = (lvlId, rawObj) => {
+                const idNum = Number(lvlId);
+                if (!Number.isFinite(idNum) || idNum <= 0 || !rawObj || typeof rawObj !== 'object') return;
+
+                const score = Number(rawObj.score ?? rawObj.bestScore ?? rawObj.nilai ?? 0);
+                const stars = Number(rawObj.stars ?? rawObj.bintang ?? (score >= 95 ? 3 : (score >= 80 ? 2 : 0)));
+                const isDone = Boolean(
+                    rawObj.completed ||
+                    rawObj.done ||
+                    rawObj.status === 'done' ||
+                    score >= 80 ||
+                    stars >= 2
+                );
+
+                if (isDone) {
+                    const prev = resultMap.get(idNum);
+                    resultMap.set(idNum, {
+                        jenjang: jUpper,
+                        level_id: idNum,
+                        score: Math.max(prev?.score ?? 0, score || 80),
+                        stars: Math.max(prev?.stars ?? 0, stars || 2),
+                    });
+                }
+            };
+
+            // 1. Cek format objek terpusat (misal: codepawth_guest_progress / codepawth_progress)
+            const candidateStoreKeys = [
+                'codepawth_guest_progress',
+                'codepawth_progress',
+                'codepawth_demo_progress',
+            ];
+
+            for (const storeKey of candidateStoreKeys) {
+                try {
+                    const raw = localStorage.getItem(storeKey);
+                    if (!raw) continue;
+                    const parsed = JSON.parse(raw);
+                    if (!parsed || typeof parsed !== 'object') continue;
+
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(item => {
+                            if (String(item?.jenjang || '').toUpperCase() === jUpper) {
+                                registerEntry(item.level_id ?? item.levelId ?? item.level, item);
+                            }
+                        });
+                    } else {
+                        // Bentuk { SD: { "1": { score, stars, completed } } }
+                        const byJenjang = parsed[jUpper] ?? parsed[jLower];
+                        if (byJenjang && typeof byJenjang === 'object') {
+                            Object.entries(byJenjang).forEach(([lvlKey, val]) => {
+                                registerEntry(lvlKey, val);
+                            });
+                        }
+                        // Bentuk { "SD-1": { ... } } atau { "SD_1": { ... } }
+                        Object.entries(parsed).forEach(([k, val]) => {
+                            const match = k.match(new RegExp(`^${jUpper}[-_](\\d+)$`, 'i'));
+                            if (match) registerEntry(match[1], val);
+                        });
+                    }
+                } catch (_) {
+                    // Abaikan JSON tidak valid
+                }
+            }
+
+            // 2. Cek format per-level key (misal: codepawth_progress_SD_1, codepawth_eval_SD_1, dll.)
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+                const match = key.match(new RegExp(`codepawth.*${jUpper}[-_](\\d+)`, 'i'));
+                if (!match) continue;
+
+                try {
+                    const raw = localStorage.getItem(key);
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        registerEntry(match[1], parsed);
+                    } else if (raw === 'true' || raw === 'done' || Number(raw) >= 80) {
+                        const numScore = Number(raw) >= 80 ? Number(raw) : 80;
+                        registerEntry(match[1], {
+                            score: numScore,
+                            completed: true
+                        });
+                    }
+                } catch (_) {
+                    const raw = localStorage.getItem(key);
+                    if (raw === 'true' || raw === 'done') {
+                        registerEntry(match[1], {
+                            score: 80,
+                            completed: true
+                        });
+                    }
+                }
+            }
+
+            return Array.from(resultMap.values());
         }
 
         // Hitung koordinat berkelok secara otomatis berdasarkan jumlah level
@@ -740,37 +681,89 @@
         }
 
         function loadJenjangState(jenjang) {
-            const baseCatalog = dummyLevelsCatalog[jenjang] || dummyLevelsCatalog.SD;
-            const saved = JSON.parse(localStorage.getItem(getStorageKey(jenjang)));
+            const baseLevels = demoLevels[jenjang] || [];
+            const levelProgress = canSaveProgress ?
+                serverProgress.filter(item => String(item.jenjang).toUpperCase() === jenjang) :
+                getGuestLocalProgress(jenjang);
 
-            if (Array.isArray(saved) && saved.length === baseCatalog.levels.length) {
-                levelsData = assignDynamicCoordinates(saved);
+            const completedIds = new Set(levelProgress.map(item => Number(item.level_id)));
+
+            levelsData = assignDynamicCoordinates(baseLevels.map((level, index) => {
+                const progress = levelProgress.find(item => Number(item.level_id) === level.id);
+                const previousCompleted = completedIds.has(level.id - 1);
+
+                if (progress) {
+                    return {
+                        ...level,
+                        status: 'done',
+                        score: Number(progress.score),
+                        stars: Number(progress.stars),
+                        progress: 100
+                    };
+                }
+
+                if (index === 0) {
+                    return {
+                        ...level,
+                        status: 'active',
+                        score: 0,
+                        stars: 0,
+                        progress: 0
+                    };
+                }
+
+                return {
+                    ...level,
+                    status: previousCompleted ? 'active' : 'locked',
+                    score: 0,
+                    stars: 0,
+                    progress: 0
+                };
+            }));
+
+            const requestedLevelObj = (!hasConsumedUrlLevel && jenjang === initialUrlJenjang && initialUrlLevel > 0)
+                ? levelsData.find(l => l.id === initialUrlLevel && l.status !== 'locked')
+                : null;
+
+            if (requestedLevelObj) {
+                currentMascotLevel = requestedLevelObj.id;
+                hasConsumedUrlLevel = true;
             } else {
-                levelsData = assignDynamicCoordinates(baseCatalog.levels);
+                const lastDoneLevel = [...levelsData].reverse().find(l => l.status === 'done');
+                const firstActiveLevel = levelsData.find(l => l.status === 'active');
+                currentMascotLevel = lastDoneLevel?.id ?? firstActiveLevel?.id ?? (levelsData[0]?.id ?? 1);
             }
-
-            currentMascotLevel = levelsData.find(l => l.status === 'active')?.id || (levelsData[0]?.id ?? 1);
 
             // Update header banner jenjang
             document.getElementById('banner-jenjang-title').textContent = jenjang;
             document.getElementById('banner-level-count').textContent = `${levelsData.length} Level`;
-            document.getElementById('banner-jenjang-subtitle').textContent = baseCatalog.subtitle;
+            document.getElementById('banner-jenjang-subtitle').textContent = levelsData.length ?
+                `${levelsData.length} level materi demo tersedia.` :
+                'Materi demo untuk jenjang ini belum tersedia.';
 
-            // Highlight tombol switcher SD / SMP / SMA
-            document.querySelectorAll('.jenjang-switch-btn').forEach(btn => {
-                if (btn.getAttribute('data-jenjang-btn') === jenjang) {
-                    btn.classList.add('bg-blue-600', 'text-white');
-                    btn.classList.remove('text-slate-600', 'hover:bg-blue-50');
-                } else {
-                    btn.classList.remove('bg-blue-600', 'text-white');
-                    btn.classList.add('text-slate-600', 'hover:bg-blue-50');
+            // Highlight item aktif di dropdown jenjang
+            document.querySelectorAll('.jenjang-option-btn').forEach(btn => {
+                const optJenjang = btn.getAttribute('data-jenjang-option');
+                const checkIcon = btn.querySelector('.jenjang-option-check');
+                const badge = btn.querySelector('.jenjang-option-badge');
+                const isSelected = optJenjang === jenjang;
+
+                btn.classList.toggle('bg-blue-50', isSelected);
+                btn.classList.toggle('text-blue-700', isSelected);
+                btn.classList.toggle('text-slate-700', !isSelected);
+                if (checkIcon) checkIcon.classList.toggle('hidden', !isSelected);
+                if (badge) {
+                    badge.classList.toggle('bg-blue-600', isSelected);
+                    badge.classList.toggle('text-white', isSelected);
+                    badge.classList.toggle('bg-slate-100', !isSelected);
+                    badge.classList.toggle('text-slate-600', !isSelected);
                 }
             });
 
             renderLevelMap();
         }
 
-        function switchDummyJenjang(jenjang) {
+        function switchJenjang(jenjang) {
             activeJenjang = jenjang;
             closeLevelDrawer();
             loadJenjangState(jenjang);
@@ -868,10 +861,10 @@
                         <div class="absolute bottom-[86%] left-1/2 -translate-x-1/2 w-max z-20 pointer-events-none animate-peek-top flex flex-col items-center">
                             <div class="flex items-center gap-0.5 -mb-1">
                                 ${[1, 2, 3].map(s => `
-                <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
-                </svg>
-            `).join('')}
+                                <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
+                                </svg>
+                            `).join('')}
                             </div>
                             <img 
                                 src="{{ asset('images/mascot_peek.png') }}" 
@@ -881,14 +874,14 @@
                             >
                         </div>
                     ` : `
-                                                                                        <div class="mb-1 flex items-center gap-0.5">
-                                                                                            ${[1, 2, 3].map(s => `
+                        <div class="mb-1 flex items-center gap-0.5">
+                            ${[1, 2, 3].map(s => `
                             <svg class="w-3.5 h-3.5 ${s <= lvl.stars ? 'text-amber-400 drop-shadow-2xs' : 'text-slate-300/90'}" viewBox="0 0 24 24" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
                             </svg>
                         `).join('')}
-                                                                                        </div>
-                                                                                    `}
+                        </div>
+                    `}
 
                 <!-- BULATAN PEDESTAL 3D DENGAN ANGKA LEVEL DI DALAMNYA -->
                 <div class="relative ${circleSizeClass} rounded-full ${pedestalClass} p-1.5 flex items-center justify-center transition-all ${isMascotHere ? 'ring-4 ring-blue-300/70' : ''}">
@@ -899,20 +892,20 @@
                     </div>
 
                     ${isDone ? `
-                                                                                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                                                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                                                                                </svg>
-                                                                                            </span>
-                                                                                        ` : ''}
+                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </span>
+                        ` : ''}
 
                     ${isLocked ? `
-                                                                                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
-                                                                                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                                                                                                    <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
-                                                                                                </svg>
-                                                                                            </span>
-                                                                                        ` : ''}
+                            <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-500 border-2 border-white text-white flex items-center justify-center shadow-sm">
+                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z" clip-rule="evenodd"/>
+                                </svg>
+                            </span>
+                        ` : ''}
                 </div>
             `;
 
@@ -921,6 +914,11 @@
 
             const totalCount = levelsData.length || 1;
             const percent = Math.round((completedCount / totalCount) * 100);
+            const finishMarker = document.getElementById('level-map-finish');
+            finishMarker?.classList.toggle(
+                'hidden',
+                levelsData.length === 0 || completedCount < levelsData.length
+            );
             document.getElementById('total-stars').textContent = totalStars;
             document.getElementById('max-stars').textContent = levelsData.length * 3;
             document.getElementById('active-level-title').textContent = `Level ${currentMascotLevel}`;
@@ -1048,24 +1046,6 @@
             setTimeout(() => {
                 backdrop.classList.add('hidden');
             }, 300);
-        }
-
-        function unlockAllDemo() {
-            levelsData = levelsData.map((lvl, idx) => ({
-                ...lvl,
-                status: idx === 0 ? 'done' : 'active',
-                score: idx === 0 ? 90 : (lvl.score || 85),
-                stars: idx === 0 ? 3 : 2,
-                progress: idx === 0 ? 100 : 50
-            }));
-            localStorage.setItem(getStorageKey(activeJenjang), JSON.stringify(levelsData));
-            renderLevelMap();
-        }
-
-        function resetDemoProgress() {
-            localStorage.removeItem(getStorageKey(activeJenjang));
-            closeLevelDrawer();
-            loadJenjangState(activeJenjang);
         }
 
         document.addEventListener('DOMContentLoaded', () => {

@@ -37,6 +37,7 @@ class TeacherMaterialController extends Controller
         'print', 'input', 'int', 'str', 'float',
         'bool', 'type',
     ];
+    private const DEMO_CLASS_CODE = 'DEMOPWT';
 
     /*
     |--------------------------------------------------------------------------
@@ -48,6 +49,9 @@ class TeacherMaterialController extends Controller
     {
         $materials = LearningMaterial::query()
             ->where('teacher_id', Auth::id())
+            ->whereDoesntHave('learningClass', function ($query) {
+                $query->where('join_code', self::DEMO_CLASS_CODE);
+            })
             ->with('learningClass:id,name')
             ->latest()
             ->get();
@@ -178,7 +182,8 @@ class TeacherMaterialController extends Controller
                 'required_if:status,published',
                 'integer',
                 Rule::exists('learning_classes', 'id')
-                    ->where('teacher_id', $request->user()->id),
+                    ->where('teacher_id', $request->user()->id)
+                    ->whereNot('join_code', self::DEMO_CLASS_CODE),
             ],
         ];
 

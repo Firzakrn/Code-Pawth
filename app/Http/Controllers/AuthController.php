@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Classroom;
+use App\Models\LearningClass;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -114,8 +114,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Otomatis daftarkan murid ke Kelas Demo CodePawth (kode: DEMO-PAWTH)
-     * apabila belum bergabung ke kelas guru mana pun.
+     * Enroll a student in the demo class when it exists and they have no class yet.
      */
     private function enrollDemoClassIfNeeded(?User $user): void
     {
@@ -123,17 +122,16 @@ class AuthController extends Controller
             return;
         }
 
-        if ($user->joinedClasses()->count() === 0) {
-            $demoClass = Classroom::firstOrCreate(
-                ['code' => 'DEMO-PAWTH'],
-                [
-                    'name' => 'Kelas Demo CodePawth',
-                    'level' => 'SMP',
-                    'teacher_id' => User::where('role', 'guru')->value('id') ?? $user->id,
-                ]
-            );
+        if ($user->joinedClasses()->exists()) {
+            return;
+        }
 
-            $user->joinedClasses()->syncWithoutDetaching([$demoClass->id]);
+        $demoClass = LearningClass::query()
+            ->where('name', 'Kelas Demo CodePawth')
+            ->first();
+
+        if ($demoClass) {
+            $user->joinedClasses()->attach($demoClass->id);
         }
     }
 }

@@ -54,6 +54,11 @@ class User extends Authenticatable
         )->withTimestamps();
     }
 
+    public function studentLevelProgresses(): HasMany
+    {
+        return $this->hasMany(StudentLevelProgress::class);
+    }
+
     public function isStudent(): bool
     {
         return $this->role === 'murid';

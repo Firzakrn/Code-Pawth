@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\MateriController;
 use App\Http\Controllers\TeacherMaterialController;
 use App\Http\Middleware\EnsureRole;
 
@@ -13,8 +14,8 @@ use App\Http\Middleware\EnsureRole;
 */
 
 Route::view('/', 'welcome')->name('home');
-Route::view('/level-view', 'level-view')->name('level-view');
-Route::view('/knowledge-card', 'knowledge-card')->name('knowledge-card');
+Route::get('/level-view', [MateriController::class, 'levelView'])->name('level-view');
+Route::get('/knowledge-card', [MateriController::class, 'knowledgeCard'])->name('knowledge-card');
 Route::redirect('/auth', '/login')->name('auth');
 
 /*
@@ -25,14 +26,18 @@ Route::redirect('/auth', '/login')->name('auth');
 
 Route::prefix('materi')->name('materi.')->group(function () {
 
-    Route::view('/flashcard', 'materi.flashcard')->name('flashcard');
-    Route::view('/evaluasi', 'materi.evaluasi')->name('evaluasi');
-    Route::view('/flowchart', 'materi.flowchart')->name('flowchart');
+    Route::get('/flashcard', [MateriController::class, 'flashcard'])->name('flashcard');
+    Route::get('/evaluasi', [MateriController::class, 'evaluasi'])->name('evaluasi');
+    Route::get('/flowchart', [MateriController::class, 'flowchart'])->name('flowchart');
     Route::view('/code', 'materi.code')->name('code');
     Route::view('/exam', 'materi.exam')->name('exam');
-    Route::view('/coding', 'materi.coding')->name('coding');
+    Route::get('/coding', [MateriController::class, 'coding'])->name('coding');
 
 });
+
+Route::post('/materi/progress', [MateriController::class, 'storeProgress'])
+    ->middleware('auth')
+    ->name('materi.progress.store');
 
 /*
 |--------------------------------------------------------------------------

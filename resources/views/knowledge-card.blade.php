@@ -53,7 +53,7 @@
             <div class="lg:col-span-3">
                 <select id="kc-level-select" onchange="filterKnowledgeCards()" aria-label="Filter Level Materi"
                     class="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 text-xs font-bold text-slate-700 focus:outline-none cursor-pointer">
-                    <option value="ALL">Semua Level Materi</option>
+                    <option value="ALL">Semua Level Terbuka</option>
                 </select>
             </div>
         </div>
@@ -76,13 +76,13 @@
 @endsection
 
 @section('materi_content')
-    <div class="flex-1 min-h-0 overflow-y-auto pr-1 pb-2">
-        <!-- Grid Kartu Knowledge Card -->
-        <div id="kc-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <div class="flex-1 min-h-0 overflow-y-auto pr-1 pb-4">
+        <!-- Daftar Section Divider per Jenjang & Level -->
+        <div id="kc-cards-grid" class="flex flex-col gap-6 pt-5"></div>
 
         <!-- Empty State -->
         <div id="kc-empty-state"
-            class="hidden bg-white/95 rounded-3xl border-2 border-white shadow-soft-card p-8 text-center flex-col items-center justify-center gap-3">
+            class="hidden bg-white/95 rounded-3xl border-2 border-white shadow-soft-card p-8 text-center flex-col items-center justify-center gap-3 mt-2">
             <img src="{{ asset('images/mascot_sad.png') }}" alt="Tidak Ditemukan" class="w-20 h-20 object-contain mx-auto">
             <div>
                 <h3 class="text-base font-extrabold text-slate-900">Kartu Materi Tidak Ditemukan</h3>
@@ -119,19 +119,82 @@
         let flippedSet = new Set();
         let allFlipped = false;
 
-        // Ambil langsung $materiCatalog dari layouts/materi.blade.php tanpa duplikasi
-        function buildCardsFromMateriCatalog() {
-            const catalog = (window.MATERI_CTX && window.MATERI_CTX.catalog) ? window.MATERI_CTX.catalog : {};
-            const baseFlashcardUrl = @json(url('/materi/flashcard'));
+        function getUnlockedDeckKeys() {
+            const unlocked = new Set();
 
-            Object.entries(catalog).forEach(([deckKey, deck]) => {
+            // 1. Jika pengguna login dan serverProgress tersedia di MATERI_CTX
+            const serverProg = window.MATERI_CTX?.serverProgress;
+            if (Array.isArray(serverProg)) {
+                serverProg.forEach(item => {
+                    const j = String(item?.jenjang || '').toUpperCase();
+                    const l = Number(item?.level_id ?? item?.level ?? 0);
+                    if (j && l > 0) unlocked.add(`${j}-${l}`);
+                });
+            }
+
+            // 2. Baca progres Mode Tamu dari localStorage ('codepawth_guest_progress')
+            try {
+                const raw = localStorage.getItem('codepawth_guest_progress');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        Object.entries(parsed).forEach(([jenjangKey, levelsObj]) => {
+                            const jUpper = String(jenjangKey).toUpperCase();
+                            if (levelsObj && typeof levelsObj === 'object') {
+                                Object.entries(levelsObj).forEach(([lvlKey, info]) => {
+                                    const isDone = Boolean(
+                                        info?.completed ||
+                                        info?.done ||
+                                        Number(info?.score ?? 0) >= 80
+                                    );
+                                    if (isDone) {
+                                        unlocked.add(`${jUpper}-${Number(lvlKey)}`);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            } catch (_) {}
+
+            // 3. Fallback format lama ('codepawth_levels_sd', dll.) jika masih tersimpan
+            ['SD', 'SMP', 'SMA'].forEach(jUpper => {
+                try {
+                    const arr = JSON.parse(localStorage.getItem(`codepawth_levels_${jUpper.toLowerCase()}`));
+                    if (Array.isArray(arr)) {
+                        arr.forEach(lvl => {
+                            if (lvl?.status === 'done' || Number(lvl?.score ?? 0) >= 80) {
+                                unlocked.add(`${jUpper}-${Number(lvl.id)}`);
+                            }
+                        });
+                    }
+                } catch (_) {}
+            });
+
+            return unlocked;
+        }
+
+        function buildCardsFromMateriDecks() {
+            const decks = window.MATERI_CTX.knowledgeCardDecks || {};
+            const baseFlashcardUrl = @json(url('/materi/flashcard'));
+            const unlockedKeys = getUnlockedDeckKeys();
+
+            Object.entries(decks).forEach(([deckKey, deck]) => {
                 const [rawJenjang, rawLevel] = deckKey.split('-');
                 const jenjang = String(deck.jenjang || rawJenjang || 'SD').toUpperCase();
                 const level = Number(deck.level || rawLevel || 1);
+                const normalizedKey = `${jenjang}-${level}`;
+
+                // Tampilkan hanya level yang sudah dikerjakan
+                if (!unlockedKeys.has(normalizedKey)) {
+                    return;
+                }
+
                 const levelTitle = deck.levelTitle || `Level ${level}`;
                 const hasFlowchart = ['SMP', 'SMA'].includes(jenjang);
+                const hasCoding = jenjang === 'SMA';
                 const materiUrl =
-                    `${baseFlashcardUrl}?jenjang=${jenjang}&level=${level}&flowchart=${hasFlowchart ? '1' : '0'}`;
+                    `${baseFlashcardUrl}?jenjang=${jenjang}&level=${level}&flowchart=${hasFlowchart ? '1' : '0'}&coding=${hasCoding ? '1' : '0'}`;
 
                 ALL_LEVEL_OPTIONS.push({
                     key: deckKey,
@@ -165,6 +228,17 @@
                     });
                 });
             });
+
+            const jenjangOrder = {
+                SD: 1,
+                SMP: 2,
+                SMA: 3
+            };
+            ALL_LEVEL_OPTIONS.sort((a, b) => {
+                const jDiff = (jenjangOrder[a.jenjang] || 99) - (jenjangOrder[b.jenjang] || 99);
+                if (jDiff !== 0) return jDiff;
+                return a.level - b.level;
+            });
         }
 
         function escapeHtml(str) {
@@ -182,7 +256,7 @@
                 ALL_LEVEL_OPTIONS :
                 ALL_LEVEL_OPTIONS.filter(opt => opt.jenjang === selectedJenjang);
 
-            selectEl.innerHTML = `<option value="ALL">Semua Level (${filteredLevels.length})</option>` +
+            selectEl.innerHTML = `<option value="ALL">Semua Level Terbuka (${filteredLevels.length})</option>` +
                 filteredLevels.map(opt =>
                     `<option value="${escapeHtml(opt.key)}">${escapeHtml(opt.jenjang)} Level ${opt.level} — ${escapeHtml(opt.levelTitle)}</option>`
                 ).join('');
@@ -289,6 +363,30 @@
 
             if (cards.length === 0) {
                 grid.innerHTML = '';
+                const emptyTitle = emptyState.querySelector('h3');
+                const emptyDesc = emptyState.querySelector('p');
+                const emptyBtn = emptyState.querySelector('button');
+
+                if (ALL_KC_CARDS.length === 0) {
+                    if (emptyTitle) emptyTitle.textContent = 'Belum Ada Kartu Materi Terbuka';
+                    if (emptyDesc) emptyDesc.textContent =
+                        'Selesaikan evaluasi pada level materi terlebih dahulu agar kartu konsepnya terbuka di sini.';
+                    if (emptyBtn) {
+                        emptyBtn.textContent = 'Mulai Belajar di Peta Level';
+                        emptyBtn.onclick = () => {
+                            window.location.href = @json(url('/level-view'));
+                        };
+                    }
+                } else {
+                    if (emptyTitle) emptyTitle.textContent = 'Kartu Materi Tidak Ditemukan';
+                    if (emptyDesc) emptyDesc.textContent =
+                        'Coba kata kunci lain atau atur ulang filter kelas dan level materi.';
+                    if (emptyBtn) {
+                        emptyBtn.textContent = 'Reset Filter & Pencarian';
+                        emptyBtn.onclick = resetAllKcFilters;
+                    }
+                }
+
                 emptyState.classList.remove('hidden');
                 emptyState.classList.add('flex');
                 return;
@@ -297,122 +395,227 @@
             emptyState.classList.add('hidden');
             emptyState.classList.remove('flex');
 
+            const jenjangOrder = {
+                SD: 1,
+                SMP: 2,
+                SMA: 3
+            };
             const badgeStyles = {
-                SD: 'bg-sky-100 text-sky-700',
-                SMP: 'bg-blue-100 text-blue-700',
-                SMA: 'bg-indigo-100 text-indigo-700'
+                SD: {
+                    pill: 'bg-sky-100 text-sky-700 border-sky-200',
+                    header: 'from-[#EBF5FF] via-[#F4F9FF] to-[#E8F3FF]',
+                    dot: 'bg-sky-500'
+                },
+                SMP: {
+                    pill: 'bg-blue-100 text-blue-700 border-blue-200',
+                    header: 'from-[#EBF2FF] via-[#F2F7FF] to-[#E6EFFF]',
+                    dot: 'bg-blue-600'
+                },
+                SMA: {
+                    pill: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+                    header: 'from-[#EEF0FF] via-[#F5F6FF] to-[#E9ECFF]',
+                    dot: 'bg-indigo-600'
+                }
             };
 
-            grid.innerHTML = cards.map(card => {
-                const uid = `${card.deckKey}-${card.pairId}`;
-                const isFlipped = flippedSet.has(uid);
-                const iconHtml = kcSvgIcons[card.iconKey] || kcSvgIcons.default;
-                const badgeClass = badgeStyles[card.jenjang] || 'bg-blue-100 text-blue-700';
+            const mascotAssets = [
+                @json(asset('images/mascot_peek.png')),
+                @json(asset('images/mascot_what.png'))
+            ];
 
-                return `
-                <div style="perspective: 1000px;" class="select-none">
-                    <div
-                        id="kc-flipper-${escapeHtml(uid)}"
-                        data-kc-uid="${escapeHtml(uid)}"
-                        onclick="toggleSingleCardFlip('${escapeHtml(uid)}')"
-                        style="transform-style: preserve-3d; transform: ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'};"
-                        class="grid transition-transform duration-500 cursor-pointer h-full"
-                    >
-                        <!-- Sisi Depan -->
+            // Kelompokkan kartu berdasarkan Jenjang + Level
+            const groupMap = new Map();
+            cards.forEach(card => {
+                const groupKey = `${card.jenjang}-${card.level}`;
+                if (!groupMap.has(groupKey)) {
+                    groupMap.set(groupKey, {
+                        key: groupKey,
+                        jenjang: card.jenjang,
+                        level: Number(card.level),
+                        levelTitle: card.levelTitle,
+                        materiUrl: card.materiUrl,
+                        cards: []
+                    });
+                }
+                groupMap.get(groupKey).cards.push(card);
+            });
+
+            // Urutkan kelompok: SD -> SMP -> SMA, lalu Level 1 -> 2 -> 3...
+            const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
+                const jDiff = (jenjangOrder[a.jenjang] || 99) - (jenjangOrder[b.jenjang] || 99);
+                if (jDiff !== 0) return jDiff;
+                return a.level - b.level;
+            });
+
+            grid.innerHTML = sortedGroups.map((group, groupIdx) => {
+                const theme = badgeStyles[group.jenjang] || badgeStyles.SMP;
+                const mascotSrc = mascotAssets[groupIdx % mascotAssets.length];
+                const totalDots = Math.min(Math.max(group.cards.length, 3), 5);
+
+                const dotsHtml = Array.from({
+                    length: totalDots
+                }, (_, idx) => `
+                    <span class="w-2 h-2 rounded-full ${idx === 0 ? theme.dot : 'bg-blue-200/90'}"></span>
+                `).join('');
+
+                const cardsHtml = group.cards.map(card => {
+                    const uid = `${card.deckKey}-${card.pairId}`;
+                    const isFlipped = flippedSet.has(uid);
+                    const iconHtml = kcSvgIcons[card.iconKey] || kcSvgIcons.default;
+
+                    return `
+                    <div style="perspective: 1000px;" class="select-none">
                         <div
-                            style="backface-visibility: hidden;"
-                            class="col-start-1 row-start-1 bg-white/95 hover:bg-white rounded-3xl border-2 border-white hover:border-blue-200 shadow-soft-card p-5 flex flex-col justify-between gap-4 transition-colors"
+                            id="kc-flipper-${escapeHtml(uid)}"
+                            data-kc-uid="${escapeHtml(uid)}"
+                            onclick="toggleSingleCardFlip('${escapeHtml(uid)}')"
+                            style="transform-style: preserve-3d; transform: ${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'};"
+                            class="grid transition-transform duration-500 cursor-pointer h-full"
                         >
-                            <div class="space-y-3">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="px-2.5 py-1 rounded-full ${badgeClass} text-[11px] font-extrabold">
-                                        ${escapeHtml(card.jenjang)} • Level ${card.level}
-                                    </span>
-                                    <span class="text-[11px] font-bold text-slate-400 truncate max-w-[140px]">
-                                        ${escapeHtml(card.frontJudul)}
-                                    </span>
+                            <!-- Sisi Depan -->
+                            <div
+                                style="backface-visibility: hidden;"
+                                class="col-start-1 row-start-1 bg-white hover:bg-blue-50/20 rounded-2xl border border-slate-200/80 hover:border-blue-300 shadow-2xs p-4 sm:p-5 flex flex-col justify-between gap-4 transition-colors"
+                            >
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="px-2.5 py-0.5 rounded-full border ${theme.pill} text-[11px] font-extrabold">
+                                            ${escapeHtml(card.jenjang)} • Level ${card.level}
+                                        </span>
+                                        <span class="text-[11px] font-bold text-slate-400 truncate max-w-[140px]">
+                                            ${escapeHtml(card.frontJudul)}
+                                        </span>
+                                    </div>
+
+                                    <div class="flex items-center gap-3 pt-0.5">
+                                        <div class="w-11 h-11 rounded-2xl bg-[#EBF3FF] border border-blue-100 flex items-center justify-center shrink-0">
+                                            ${iconHtml}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="text-base sm:text-lg font-extrabold text-slate-900 break-words">
+                                                ${escapeHtml(card.frontIsi)}
+                                            </div>
+                                            <div class="text-[11px] font-semibold text-blue-600 truncate">
+                                                ${escapeHtml(card.levelTitle)}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p class="text-xs text-slate-600 leading-relaxed">
+                                        ${escapeHtml(card.frontMain)}
+                                    </p>
                                 </div>
 
-                                <div class="flex items-center gap-3 pt-1">
-                                    <div class="w-11 h-11 rounded-2xl bg-[#EBF3FF] border border-blue-100 flex items-center justify-center shrink-0">
-                                        ${iconHtml}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="text-base sm:text-lg font-extrabold text-slate-900 break-words">
+                                <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                    <span class="text-[11px] font-bold text-slate-400">Klik untuk arti</span>
+                                    <a
+                                        href="${escapeHtml(card.materiUrl)}"
+                                        onclick="event.stopPropagation()"
+                                        class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-extrabold shadow-2xs transition-colors"
+                                    >
+                                        <span>Buka Materi</span>
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Sisi Belakang -->
+                            <div
+                                style="backface-visibility: hidden; transform: rotateY(180deg);"
+                                class="col-start-1 row-start-1 bg-gradient-to-br from-[#EBF3FF] to-white rounded-2xl border border-blue-200 shadow-2xs p-4 sm:p-5 flex flex-col justify-between gap-4"
+                            >
+                                <div class="space-y-2.5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="px-2.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-wider">
+                                            ${escapeHtml(card.backJudul)}
+                                        </span>
+                                        <span class="text-[11px] font-extrabold text-blue-700">
                                             ${escapeHtml(card.frontIsi)}
-                                        </div>
-                                        <div class="text-[11px] font-semibold text-blue-600 truncate">
-                                            ${escapeHtml(card.levelTitle)}
-                                        </div>
+                                        </span>
+                                    </div>
+
+                                    <div class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug pt-0.5">
+                                        ${escapeHtml(card.backIsi)}
+                                    </div>
+
+                                    <div class="rounded-xl bg-white/90 border border-blue-100 px-3 py-2 text-xs text-slate-600 leading-relaxed">
+                                        ${escapeHtml(card.backMain)}
                                     </div>
                                 </div>
 
-                                <p class="text-xs text-slate-600 leading-relaxed">
-                                    ${escapeHtml(card.frontMain)}
-                                </p>
-                            </div>
-
-                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                                <span class="text-[11px] font-bold text-slate-400">Klik untuk arti</span>
-                                <a
-                                    href="${escapeHtml(card.materiUrl)}"
-                                    onclick="event.stopPropagation()"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white text-[11px] font-extrabold transition-colors"
-                                >
-                                    <span>Buka Materi</span>
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Sisi Belakang -->
-                        <div
-                            style="backface-visibility: hidden; transform: rotateY(180deg);"
-                            class="col-start-1 row-start-1 bg-gradient-to-br from-[#EBF3FF] to-white rounded-3xl border-2 border-blue-200 shadow-soft-card p-5 flex flex-col justify-between gap-4"
-                        >
-                            <div class="space-y-2.5">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="px-2.5 py-1 rounded-full bg-blue-600 text-white text-[10px] font-extrabold uppercase tracking-wider">
-                                        ${escapeHtml(card.backJudul)}
-                                    </span>
-                                    <span class="text-[11px] font-extrabold text-blue-700">
-                                        ${escapeHtml(card.frontIsi)}
-                                    </span>
+                                <div class="pt-3 border-t border-blue-100 flex items-center justify-between gap-2">
+                                    <span class="text-[11px] font-bold text-blue-600">Klik untuk kembali</span>
+                                    <a
+                                        href="${escapeHtml(card.materiUrl)}"
+                                        onclick="event.stopPropagation()"
+                                        class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-extrabold shadow-2xs transition-colors"
+                                    >
+                                        <span>Latihan Level ${card.level}</span>
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                        </svg>
+                                    </a>
                                 </div>
-
-                                <div class="text-sm sm:text-base font-extrabold text-slate-900 leading-snug pt-1">
-                                    ${escapeHtml(card.backIsi)}
-                                </div>
-
-                                <div class="rounded-xl bg-white/90 border border-blue-100 px-3 py-2 text-xs text-slate-600 leading-relaxed">
-                                    ${escapeHtml(card.backMain)}
-                                </div>
-                            </div>
-
-                            <div class="pt-3 border-t border-blue-100 flex items-center justify-between gap-2">
-                                <span class="text-[11px] font-bold text-blue-600">Klik untuk kembali</span>
-                                <a
-                                    href="${escapeHtml(card.materiUrl)}"
-                                    onclick="event.stopPropagation()"
-                                    class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-extrabold shadow-2xs transition-colors"
-                                >
-                                    <span>Latihan Level ${card.level}</span>
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
+                    `;
+                }).join('');
+
+                return `
+                <section class="relative bg-white/95 rounded-3xl border-2 border-white shadow-soft-card">
+                    <!-- Header Section Divider Jenjang & Level -->
+                    <div class="relative bg-gradient-to-r ${theme.header} rounded-t-3xl px-4 sm:px-5 py-3 border-b border-blue-100/80 flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5 flex-wrap min-w-0 pr-20 sm:pr-28">
+                            <!-- Ikon Bintang Level -->
+                            <div class="w-8 h-8 rounded-full bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-400 shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+
+                            <!-- Badge Jenjang -->
+                            <span class="px-2.5 py-0.5 rounded-full border ${theme.pill} text-xs font-extrabold tracking-wide shrink-0">
+                                ${escapeHtml(group.jenjang)}
+                            </span>
+
+                            <!-- Judul Level -->
+                            <h2 class="text-base sm:text-lg font-extrabold text-slate-900 shrink-0">
+                                Level ${group.level}
+                            </h2>
+
+                            <!-- Pill Topik Materi -->
+                            <span class="px-3 py-1 rounded-full bg-white/95 border border-blue-100 text-xs font-bold text-slate-600 shadow-2xs truncate max-w-full">
+                                ${escapeHtml(group.levelTitle)}
+                            </span>
+                        </div>
+
+                        <!-- Indikator Titik & Maskot Mengintip -->
+                        <div class="flex items-center gap-3 shrink-0">
+                            <div class="hidden sm:flex items-center gap-1.5 mr-20">
+                                ${dotsHtml}
+                            </div>
+                            <img
+                                src="${mascotSrc}"
+                                alt="Maskot Level ${group.level}"
+                                class="pointer-events-none absolute -top-4 right-3 sm:right-5 w-16 h-14 sm:w-20 sm:h-16 object-contain object-bottom drop-shadow-xs"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Grid Kartu di Dalam Level Ini -->
+                    <div class="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        ${cardsHtml}
+                    </div>
+                </section>
+                `;
             }).join('');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            buildCardsFromMateriCatalog();
+            buildCardsFromMateriDecks();
             populateLevelDropdown();
             filterKnowledgeCards();
         });

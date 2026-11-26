@@ -378,9 +378,13 @@
 
         const {
             levelId,
+            hasCoding,
+            codingUrl,
             evaluasiUrl
         } = window.MATERI_CTX;
-        const activeChallenge = smpFlowchartCatalog[levelId] || smpFlowchartCatalog[1];
+        const activeChallenge = window.MATERI_CTX.flowchartChallenge ||
+            smpFlowchartCatalog[levelId] ||
+            smpFlowchartCatalog[1];
 
         let selectedBlockType = null;
         let slotAnswers = {
@@ -574,17 +578,26 @@
             const flowMascotImg = document.getElementById('flow-modal-mascot');
 
             if (scoreOutOf10 >= 8) {
-                window.unlockMateriTab('nav-tab-evaluasi', 'nav-tab-evaluasi-icon', 'Lanjut ke Evaluasi');
+                const nextTabId = hasCoding ? 'nav-tab-coding' : 'nav-tab-evaluasi';
+                const nextIconId = hasCoding ? 'nav-tab-coding-icon' : 'nav-tab-evaluasi-icon';
+                const nextUrl = hasCoding ? (codingUrl || `{{ url('/materi/coding') }}?${window.MATERI_CTX.query}`) :
+                    evaluasiUrl;
+                const nextLabel = hasCoding ? 'Lanjut ke Coding' : 'Lanjut ke Evaluasi';
+
+                window.unlockMateriTab(nextTabId, nextIconId, nextLabel);
                 if (flowMascotImg) flowMascotImg.src = "{{ asset('images/mascot_happy.png') }}";
                 document.getElementById('flow-modal-title').textContent = 'Flowchart Tepat!';
-                document.getElementById('flow-modal-desc').textContent = 'Susunan blok flowchart sudah benar! Sekarang lanjut ke tahap Evaluasi untuk menuntaskan level ini.';
-                continueBtn.href = evaluasiUrl;
+                document.getElementById('flow-modal-desc').textContent = hasCoding ?
+                    'Susunan blok flowchart sudah benar! Sekarang lanjut terjemahkan ke kode Python.' :
+                    'Susunan blok flowchart sudah benar! Sekarang lanjut ke tahap Evaluasi untuk menuntaskan level ini.';
+                continueBtn.href = nextUrl;
                 continueBtn.onclick = null;
-                continueText.textContent = 'Lanjut ke Evaluasi';
+                continueText.textContent = nextLabel;
             } else {
                 if (flowMascotImg) flowMascotImg.src = "{{ asset('images/mascot_angry.png') }}";
                 document.getElementById('flow-modal-title').textContent = 'Belum Tepat!';
-                document.getElementById('flow-modal-desc').textContent = 'Periksa kembali simbol yang berwarna merah, lalu susun ulang flowchart-nya.';
+                document.getElementById('flow-modal-desc').textContent =
+                    'Periksa kembali simbol yang berwarna merah, lalu susun ulang flowchart-nya.';
                 continueBtn.href = '#';
                 continueText.textContent = 'Perbaiki Jawaban';
                 continueBtn.onclick = (e) => {

@@ -1,16 +1,24 @@
 @extends('layouts.app')
 
 @php
-    $jenjangParam = strtoupper(request('jenjang', 'SD'));
-    $levelParam = (int) request('level', 1);
+    $isDemoPreview = $isDemoPreview ?? false;
+    $demoContentAvailable = $demoContentAvailable ?? true;
+    $jenjangParam = $isDemoPreview ? $demoJenjang : strtoupper(request('jenjang', 'SD'));
+    $levelParam = $isDemoPreview ? (int) $demoLevelId : (int) request('level', 1);
 
     $isAdvancedJenjang = in_array($jenjangParam, ['SMP', 'SMA']);
 
-    $hasFlowchart = request()->has('flowchart')
-        ? filter_var(request('flowchart'), FILTER_VALIDATE_BOOLEAN)
-        : $isAdvancedJenjang;
+    $hasFlowchart = $isDemoPreview
+        ? $demoHasFlowchart ?? false
+        : (request()->has('flowchart')
+            ? filter_var(request('flowchart'), FILTER_VALIDATE_BOOLEAN)
+            : $isAdvancedJenjang);
 
-    $hasCoding = request()->has('coding') ? filter_var(request('coding'), FILTER_VALIDATE_BOOLEAN) : $isAdvancedJenjang;
+    $hasCoding = $isDemoPreview
+        ? $demoHasCoding ?? false
+        : (request()->has('coding')
+            ? filter_var(request('coding'), FILTER_VALIDATE_BOOLEAN)
+            : $isAdvancedJenjang);
 
     $materiQuery =
         "jenjang={$jenjangParam}&level={$levelParam}&flowchart=" .
@@ -19,325 +27,7 @@
         ($hasCoding ? '1' : '0');
     $currentStep = trim($__env->yieldContent('materi_step', 'flashcard'));
 
-    // =========================================================================
-    // DATA MATERI TERPUSAT (SIAP MIGRASI KE DATABASE)
-    // =========================================================================
-    $materiCatalog = [
-        'SD-1' => [
-            'levelTitle' => 'Kenalan dengan Python',
-            'items' => [
-                [
-                    'id' => 1,
-                    'pair_id' => 1,
-                    'kategori' => 'front',
-                    'judul' => 'Fungsi Output',
-                    'main_materi' => 'Perintah dasar Python untuk mencetak informasi ke konsol',
-                    'isi_materi' => 'print()',
-                    'iconKey' => 'monitor',
-                ],
-                [
-                    'id' => 2,
-                    'pair_id' => 1,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Fungsi',
-                    'main_materi' => 'Contoh: print("Halo, CodePawth!")',
-                    'isi_materi' => 'Menampilkan teks atau hasil ke layar',
-                    'iconKey' => 'monitor',
-                ],
-                [
-                    'id' => 3,
-                    'pair_id' => 2,
-                    'kategori' => 'front',
-                    'judul' => 'Tipe Data Teks',
-                    'main_materi' => 'Jenis data yang diapit oleh tanda kutip dua atau satu',
-                    'isi_materi' => 'String (str)',
-                    'iconKey' => 'text',
-                ],
-                [
-                    'id' => 4,
-                    'pair_id' => 2,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Tipe Data',
-                    'main_materi' => 'Contoh: nama = "Budi Santoso"',
-                    'isi_materi' => 'Menyimpan data berupa teks atau kalimat',
-                    'iconKey' => 'text',
-                ],
-                [
-                    'id' => 5,
-                    'pair_id' => 3,
-                    'kategori' => 'front',
-                    'judul' => 'Tipe Data Angka',
-                    'main_materi' => 'Jenis data numerik tanpa koma desimal',
-                    'isi_materi' => 'Integer (int)',
-                    'iconKey' => 'number',
-                ],
-                [
-                    'id' => 6,
-                    'pair_id' => 3,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Tipe Data',
-                    'main_materi' => 'Contoh: umur = 12',
-                    'isi_materi' => 'Menyimpan angka bilangan bulat',
-                    'iconKey' => 'number',
-                ],
-                [
-                    'id' => 7,
-                    'pair_id' => 4,
-                    'kategori' => 'front',
-                    'judul' => 'Fungsi Masukan',
-                    'main_materi' => 'Perintah untuk membaca ketikan dari pengguna',
-                    'isi_materi' => 'input()',
-                    'iconKey' => 'keyboard',
-                ],
-                [
-                    'id' => 8,
-                    'pair_id' => 4,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Fungsi',
-                    'main_materi' => 'Contoh: kota = input("Asal kota: ")',
-                    'isi_materi' => 'Menerima masukan data dari pengguna',
-                    'iconKey' => 'keyboard',
-                ],
-            ],
-        ],
-
-        'SD-2' => [
-            'levelTitle' => 'Variabel & Operasi Hitung',
-            'items' => [
-                [
-                    'id' => 9,
-                    'pair_id' => 5,
-                    'kategori' => 'front',
-                    'judul' => 'Konsep Penyimpanan',
-                    'main_materi' => 'Nama pengenal untuk menampung nilai di memori',
-                    'isi_materi' => 'Variabel',
-                    'iconKey' => 'box',
-                ],
-                [
-                    'id' => 10,
-                    'pair_id' => 5,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Konsep',
-                    'main_materi' => 'Contoh: skor = 100',
-                    'isi_materi' => 'Tempat menyimpan nilai data sementara',
-                    'iconKey' => 'box',
-                ],
-                [
-                    'id' => 11,
-                    'pair_id' => 6,
-                    'kategori' => 'front',
-                    'judul' => 'Aritmatika Dasar',
-                    'main_materi' => 'Simbol untuk menggabungkan dua nilai bilangan',
-                    'isi_materi' => 'Operator +',
-                    'iconKey' => 'plus',
-                ],
-                [
-                    'id' => 12,
-                    'pair_id' => 6,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Operator',
-                    'main_materi' => 'Contoh: total = 15 + 5',
-                    'isi_materi' => 'Menjumlahkan dua nilai angka',
-                    'iconKey' => 'plus',
-                ],
-                [
-                    'id' => 13,
-                    'pair_id' => 7,
-                    'kategori' => 'front',
-                    'judul' => 'Logika Kontrol',
-                    'main_materi' => 'Struktur perulangan dengan jumlah langkah tertentu',
-                    'isi_materi' => 'for i in range(5):',
-                    'iconKey' => 'loop',
-                ],
-                [
-                    'id' => 14,
-                    'pair_id' => 7,
-                    'kategori' => 'back',
-                    'judul' => 'Perulangan',
-                    'main_materi' => 'Menjalankan blok kode berulang kali tanpa menulis ulang',
-                    'isi_materi' => 'Mengulang suatu langkah secara otomatis',
-                    'iconKey' => 'loop',
-                ],
-                [
-                    'id' => 15,
-                    'pair_id' => 8,
-                    'kategori' => 'front',
-                    'judul' => 'Catatan Program',
-                    'main_materi' => 'Baris teks yang diabaikan saat program dijalankan',
-                    'isi_materi' => 'Komentar (#)',
-                    'iconKey' => 'note',
-                ],
-                [
-                    'id' => 16,
-                    'pair_id' => 8,
-                    'kategori' => 'back',
-                    'judul' => 'Penjelasan Catatan',
-                    'main_materi' => 'Contoh: # Ini komentar program',
-                    'isi_materi' => 'Memberi catatan penjelasan pada kode',
-                    'iconKey' => 'note',
-                ],
-            ],
-        ],
-
-        'SMP-1' => [
-            'levelTitle' => 'Simbol Dasar Flowchart',
-            'items' => [
-                [
-                    'id' => 101,
-                    'pair_id' => 101,
-                    'kategori' => 'front',
-                    'judul' => 'Simbol Terminator',
-                    'main_materi' => 'Simbol berbentuk kapsul di ujung awal dan akhir diagram',
-                    'isi_materi' => 'Mulai / Selesai',
-                    'iconKey' => 'box',
-                ],
-                [
-                    'id' => 102,
-                    'pair_id' => 101,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Terminator',
-                    'main_materi' => 'Setiap flowchart wajib diawali dan diakhiri simbol ini',
-                    'isi_materi' => 'Menandai titik awal dan akhir aliran flowchart',
-                    'iconKey' => 'box',
-                ],
-                [
-                    'id' => 103,
-                    'pair_id' => 102,
-                    'kategori' => 'front',
-                    'judul' => 'Simbol Data',
-                    'main_materi' => 'Simbol berbentuk jajar genjang untuk interaksi data',
-                    'isi_materi' => 'Input / Output',
-                    'iconKey' => 'keyboard',
-                ],
-                [
-                    'id' => 104,
-                    'pair_id' => 102,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Simbol Data',
-                    'main_materi' => 'Contoh: Input bilangan atau Output Genap',
-                    'isi_materi' => 'Menerima masukan data atau menampilkan hasil',
-                    'iconKey' => 'keyboard',
-                ],
-                [
-                    'id' => 105,
-                    'pair_id' => 103,
-                    'kategori' => 'front',
-                    'judul' => 'Simbol Pengolahan',
-                    'main_materi' => 'Simbol berbentuk persegi panjang pada diagram alir',
-                    'isi_materi' => 'Proses',
-                    'iconKey' => 'monitor',
-                ],
-                [
-                    'id' => 106,
-                    'pair_id' => 103,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Simbol Proses',
-                    'main_materi' => 'Contoh: menghitung sisa bagi atau rumus luas',
-                    'isi_materi' => 'Menjalankan perhitungan atau pengolahan data',
-                    'iconKey' => 'monitor',
-                ],
-                [
-                    'id' => 107,
-                    'pair_id' => 104,
-                    'kategori' => 'front',
-                    'judul' => 'Simbol Decision',
-                    'main_materi' => 'Simbol berbentuk belah ketupat untuk percabangan logika',
-                    'isi_materi' => 'Kondisi',
-                    'iconKey' => 'branch',
-                ],
-                [
-                    'id' => 108,
-                    'pair_id' => 104,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Simbol Kondisi',
-                    'main_materi' => 'Memiliki dua jalur keluaran berdasarkan syarat',
-                    'isi_materi' => 'Menentukan cabang jalur Ya atau Tidak',
-                    'iconKey' => 'branch',
-                ],
-            ],
-        ],
-        'SMA-1' => [
-            'levelTitle' => 'Algoritma & Percabangan Python',
-            'items' => [
-                [
-                    'id' => 201,
-                    'pair_id' => 201,
-                    'kategori' => 'front',
-                    'judul' => 'Konversi Tipe Input',
-                    'main_materi' => 'Mengubah teks masukan pengguna menjadi bilangan bulat',
-                    'isi_materi' => 'int(input())',
-                    'iconKey' => 'keyboard',
-                ],
-                [
-                    'id' => 202,
-                    'pair_id' => 201,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Konversi',
-                    'main_materi' => 'Diperlukan sebelum melakukan operasi aritmatika atau perbandingan angka',
-                    'isi_materi' => 'Membaca input angka bilangan bulat',
-                    'iconKey' => 'keyboard',
-                ],
-                [
-                    'id' => 203,
-                    'pair_id' => 202,
-                    'kategori' => 'front',
-                    'judul' => 'Operator Modulus',
-                    'main_materi' => 'Menghitung sisa hasil pembagian dua bilangan',
-                    'isi_materi' => 'Operator %',
-                    'iconKey' => 'number',
-                ],
-                [
-                    'id' => 204,
-                    'pair_id' => 202,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Modulus',
-                    'main_materi' => 'Contoh: 8 % 2 menghasilkan 0 (habis dibagi)',
-                    'isi_materi' => 'Mencari sisa pembagian bilangan',
-                    'iconKey' => 'number',
-                ],
-                [
-                    'id' => 205,
-                    'pair_id' => 203,
-                    'kategori' => 'front',
-                    'judul' => 'Percabangan Bersyarat',
-                    'main_materi' => 'Struktur pemilihan jalur kode jika kondisi bernilai True',
-                    'isi_materi' => 'if ... else:',
-                    'iconKey' => 'branch',
-                ],
-                [
-                    'id' => 206,
-                    'pair_id' => 203,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Percabangan',
-                    'main_materi' => 'Menerjemahkan simbol belah ketupat pada flowchart ke Python',
-                    'isi_materi' => 'Menjalankan blok kode sesuai kondisi logika',
-                    'iconKey' => 'branch',
-                ],
-                [
-                    'id' => 207,
-                    'pair_id' => 204,
-                    'kategori' => 'front',
-                    'judul' => 'Aturan Indentasi',
-                    'main_materi' => 'Spasi menjorok ke dalam setelah tanda titik dua (:)',
-                    'isi_materi' => 'Indentasi (4 Spasi)',
-                    'iconKey' => 'note',
-                ],
-                [
-                    'id' => 208,
-                    'pair_id' => 204,
-                    'kategori' => 'back',
-                    'judul' => 'Fungsi Indentasi',
-                    'main_materi' => 'Menandakan baris kode berada di dalam blok if atau else',
-                    'isi_materi' => 'Menentukan cakupan blok perintah Python',
-                    'iconKey' => 'note',
-                ],
-            ],
-        ],
-    ];
-
-    $deckKey = "{$jenjangParam}-{$levelParam}";
-    $fallbackKey = $hasFlowchart ? 'SMP-1' : 'SD-1';
-    $activeDeckData = $materiCatalog[$deckKey] ?? $materiCatalog[$fallbackKey];
+    $activeDeckData = $demoDeck ?? ['levelTitle' => 'Materi demo belum tersedia', 'items' => []];
 @endphp
 
 @section('content')
@@ -440,169 +130,199 @@
             </div>
 
             <!-- Bar Skor / Progres -->
-            @yield('materi_stats')
+            @if (!$isDemoPreview || $demoContentAvailable)
+                @yield('materi_stats')
+            @endif
         </div>
 
         <!-- KOTAKAN TAB FOLDER TERPUSAT (SD: Flashcard -> Evaluasi | SMP: Flashcard -> Flowchart -> Evaluasi) -->
         <div class="flex-1 min-h-0 flex flex-col">
-            <div class="flex items-end justify-between px-2 shrink-0">
-                <div class="flex items-center gap-1.5">
-
-                    <!-- TAB 1: FLASHCARD -->
-                    @if ($currentStep === 'flashcard')
-                        <div
-                            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-                            </svg>
-                            <span>Flashcard</span>
-                        </div>
-                    @else
-                        <a href="{{ url('/materi/flashcard') }}?{{ $materiQuery }}"
-                            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
-                            <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <span>Flashcard</span>
+            @if ($isDemoPreview && !$demoContentAvailable)
+                <section
+                    class="m-auto max-w-xl rounded-3xl border border-blue-100 bg-white/95 p-8 text-center shadow-soft-card">
+                    <h2 class="text-xl font-extrabold text-slate-900">Materi demo belum tersedia</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-600">
+                        Materi untuk tahap {{ ucfirst($currentStep) }} di kelas
+                        {{ $demoClassName ?? 'Demo CodePawth' }} belum ditambahkan.
+                    </p>
+                    @unless ($canSaveProgress ?? false)
+                        <a href="{{ route('login') }}"
+                            class="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+                            Masuk untuk menyimpan progres
                         </a>
-                    @endif
+                    @endunless
+                </section>
+            @else
+                <div class="flex items-end justify-between px-2 shrink-0">
+                    <div class="flex items-center gap-1.5">
 
-                    <!-- TAB 2: FLOWCHART (Kondisional berdasarkan boolean $hasFlowchart) -->
-                    @if ($hasFlowchart)
-                        @if ($currentStep === 'flowchart')
+                        <!-- TAB 1: FLASHCARD -->
+                        @if ($currentStep === 'flashcard')
                             <div
                                 class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2"
-                                    viewBox="0 0 24 24">
-                                    <rect x="7" y="3" width="10" height="5" rx="1.5" />
-                                    <polygon points="12,11 17,15 12,19 7,15" />
-                                    <path stroke-linecap="round" d="M12 8v3" />
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
                                 </svg>
-                                <span>Flowchart</span>
+                                <span>Flashcard</span>
                             </div>
-                        @elseif(in_array($currentStep, ['coding', 'evaluasi']))
-                            <a href="{{ url('/materi/flowchart') }}?{{ $materiQuery }}"
+                        @else
+                            <a href="{{ url('/materi/flashcard') }}?{{ $materiQuery }}"
                                 class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
                                 <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
                                     <path fill-rule="evenodd"
                                         d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
                                         clip-rule="evenodd" />
                                 </svg>
-                                <span>Flowchart</span>
-                            </a>
-                        @else
-                            <a id="nav-tab-flowchart" href="{{ url('/materi/flowchart') }}?{{ $materiQuery }}"
-                                data-locked="true"
-                                onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
-                                title="Selesaikan semua kartu Flashcard terlebih dahulu"
-                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
-                                <span id="nav-tab-flowchart-icon" class="inline-flex items-center">
-                                    <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </span>
-                                <span>Flowchart</span>
+                                <span>Flashcard</span>
                             </a>
                         @endif
-                    @endif
 
-                    <!-- TAB 3: CODING PYTHON (Muncul setelah Flowchart untuk SMP & SMA) -->
-                    @if ($hasCoding ?? $hasFlowchart)
-                        @if ($currentStep === 'coding')
+                        <!-- TAB 2: FLOWCHART (Kondisional berdasarkan boolean $hasFlowchart) -->
+                        @if ($hasFlowchart)
+                            @if ($currentStep === 'flowchart')
+                                <div
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2"
+                                        viewBox="0 0 24 24">
+                                        <rect x="7" y="3" width="10" height="5" rx="1.5" />
+                                        <polygon points="12,11 17,15 12,19 7,15" />
+                                        <path stroke-linecap="round" d="M12 8v3" />
+                                    </svg>
+                                    <span>Flowchart</span>
+                                </div>
+                            @elseif(in_array($currentStep, ['coding', 'evaluasi']))
+                                <a href="{{ url('/materi/flowchart') }}?{{ $materiQuery }}"
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
+                                    <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Flowchart</span>
+                                </a>
+                            @else
+                                <a id="nav-tab-flowchart" href="{{ url('/materi/flowchart') }}?{{ $materiQuery }}"
+                                    data-locked="true"
+                                    onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
+                                    title="Selesaikan semua kartu Flashcard terlebih dahulu"
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
+                                    <span id="nav-tab-flowchart-icon" class="inline-flex items-center">
+                                        <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                    <span>Flowchart</span>
+                                </a>
+                            @endif
+                        @endif
+
+                        <!-- TAB 3: CODING PYTHON (Muncul setelah Flowchart untuk SMP & SMA) -->
+                        @if ($hasCoding ?? $hasFlowchart)
+                            @if ($currentStep === 'coding')
+                                <div
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                    </svg>
+                                    <span>Coding</span>
+                                </div>
+                            @elseif($currentStep === 'evaluasi')
+                                <a href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
+                                    <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <span>Coding</span>
+                                </a>
+                            @else
+                                <a id="nav-tab-coding" href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
+                                    data-locked="true"
+                                    onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
+                                    title="Selesaikan Flowchart terlebih dahulu"
+                                    class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
+                                    <span id="nav-tab-coding-icon" class="inline-flex items-center">
+                                        <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                    </span>
+                                    <span>Coding</span>
+                                </a>
+                            @endif
+                        @endif
+
+                        <!-- TAB 4: EVALUASI -->
+                        @if ($currentStep === 'evaluasi')
                             <div
                                 class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.3"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M11.25 3v4.046a3 3 0 00-4.277 4.204H1.5v-6A2.25 2.25 0 013.75 3h7.5zM12.75 3v4.011a3 3 0 014.239 4.239H22.5v-6A2.25 2.25 0 0020.25 3h-7.5zM22.5 12.75h-8.983a4.125 4.125 0 004.108 3.75.75.75 0 010 1.5 5.623 5.623 0 01-4.875-2.817V21h7.5a2.25 2.25 0 002.25-2.25v-6zM11.25 21v-5.817A5.623 5.623 0 016.375 18a.75.75 0 010-1.5 4.126 4.126 0 004.108-3.75H1.5v6A2.25 2.25 0 003.75 21h7.5z" />
                                 </svg>
-                                <span>Coding</span>
+                                <span>Evaluasi</span>
                             </div>
-                        @elseif($currentStep === 'evaluasi')
-                            <a href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
-                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/90 hover:bg-white text-slate-700 hover:text-blue-600 text-xs sm:text-sm font-bold border-t border-x border-white transition-all">
-                                <svg class="w-4 h-4 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                <span>Coding</span>
-                            </a>
                         @else
-                            <a id="nav-tab-coding" href="{{ url('/materi/coding') }}?{{ $materiQuery }}"
+                            <a id="nav-tab-evaluasi" href="{{ url('/materi/evaluasi') }}?{{ $materiQuery }}"
                                 data-locked="true"
                                 onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
-                                title="Selesaikan Flowchart terlebih dahulu"
+                                title="{{ $hasFlowchart ? 'Selesaikan Coding terlebih dahulu' : 'Selesaikan semua kartu Flashcard terlebih dahulu' }}"
                                 class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
-                                <span id="nav-tab-coding-icon" class="inline-flex items-center">
+                                <span id="nav-tab-evaluasi-icon" class="inline-flex items-center">
                                     <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                                         <path fill-rule="evenodd"
                                             d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
                                             clip-rule="evenodd" />
                                     </svg>
                                 </span>
-                                <span>Coding</span>
+                                <span>Evaluasi</span>
                             </a>
                         @endif
-                    @endif
 
-                    <!-- TAB 4: EVALUASI -->
-                    @if ($currentStep === 'evaluasi')
-                        <div
-                            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-blue-600 text-white text-xs sm:text-sm font-extrabold shadow-2xs">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M11.25 3v4.046a3 3 0 00-4.277 4.204H1.5v-6A2.25 2.25 0 013.75 3h7.5zM12.75 3v4.011a3 3 0 014.239 4.239H22.5v-6A2.25 2.25 0 0020.25 3h-7.5zM22.5 12.75h-8.983a4.125 4.125 0 004.108 3.75.75.75 0 010 1.5 5.623 5.623 0 01-4.875-2.817V21h7.5a2.25 2.25 0 002.25-2.25v-6zM11.25 21v-5.817A5.623 5.623 0 016.375 18a.75.75 0 010-1.5 4.126 4.126 0 004.108-3.75H1.5v6A2.25 2.25 0 003.75 21h7.5z" />
-                            </svg>
-                            <span>Evaluasi</span>
-                        </div>
-                    @else
-                        <a id="nav-tab-evaluasi" href="{{ url('/materi/evaluasi') }}?{{ $materiQuery }}"
-                            data-locked="true" onclick="if(this.dataset.locked === 'true') { event.preventDefault(); }"
-                            title="{{ $hasFlowchart ? 'Selesaikan Coding terlebih dahulu' : 'Selesaikan semua kartu Flashcard terlebih dahulu' }}"
-                            class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-t-2xl bg-white/60 text-slate-400 text-xs sm:text-sm font-bold border-t border-x border-white/80 opacity-55 pointer-events-none cursor-not-allowed select-none transition-all duration-300">
-                            <span id="nav-tab-evaluasi-icon" class="inline-flex items-center">
-                                <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M12 1.5a5.25 5.25 0 00-5.25 5.25v3a3 3 0 00-3 3v6.75a3 3 0 003 3h10.5a3 3 0 003-3v-6.75a3 3 0 00-3-3v-3c0-2.9-2.35-5.25-5.25-5.25zm3.75 8.25v-3a3.75 3.75 0 10-7.5 0v3h7.5z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </span>
-                            <span>Evaluasi</span>
-                        </a>
-                    @endif
-
+                    </div>
+                    <div class="hidden sm:flex items-center gap-2.5 pb-1.5">
+                        @yield('materi_tab_right')
+                    </div>
                 </div>
-                <div class="hidden sm:flex items-center gap-2.5 pb-1.5">
-                    @yield('materi_tab_right')
-                </div>
-            </div>
 
-            <!-- Isi Utama Halaman Materi -->
-            <div class="flex-1 min-h-0 flex flex-col">
-                @yield('materi_content')
-            </div>
+                <!-- Isi Utama Halaman Materi -->
+                <div class="flex-1 min-h-0 flex flex-col">
+                    @yield('materi_content')
+                </div>
+            @endif
         </div>
 
     </main>
 
     <!-- =========================================================================
-                                         INISIALISASI GLOBAL CONTEXT, DATA & TOGGLE HEADER
-                                    ========================================================================== -->
+                                             INISIALISASI GLOBAL CONTEXT, DATA & TOGGLE HEADER
+                                        ========================================================================== -->
     <script>
         window.MATERI_CTX = {
             jenjang: @json($jenjangParam),
             levelId: @json($levelParam),
+            isDemoPreview: @json($isDemoPreview),
+            canSaveProgress: @json($canSaveProgress ?? false),
+            progressStoreUrl: @json(route('materi.progress.store')),
+            csrfToken: @json(csrf_token()),
+            loginUrl: @json(route('login')),
+            demoClassCode: @json($demoClassCode ?? null),
+            flowchartChallenge: @json($flowchartChallenge ?? null),
+            codingMaterial: @json($codingMaterial ?? null),
             hasFlowchart: @json($hasFlowchart),
+            hasCoding: @json($hasCoding),
             query: @json($materiQuery),
             currentStep: @json($currentStep),
             flashcardUrl: @json(url('/materi/flashcard') . '?' . $materiQuery),
             flowchartUrl: @json(url('/materi/flowchart') . '?' . $materiQuery),
+            codingUrl: @json(url('/materi/coding') . '?' . $materiQuery),
             evaluasiUrl: @json(url('/materi/evaluasi') . '?' . $materiQuery),
             levelViewUrl: @json(url('/level-view') . '?jenjang=' . $jenjangParam)
         };
@@ -708,10 +428,12 @@
     </script>
     <script>
         window.MATERI_CTX = Object.assign(window.MATERI_CTX || {}, {
-            catalog: @json($materiCatalog)
+            knowledgeCardDecks: @json($knowledgeCardDecks ?? [])
         });
     </script>
 
     @include('additional')
-    @stack('scripts')
+    @if (!$isDemoPreview || $demoContentAvailable)
+        @stack('scripts')
+    @endif
 @endsection

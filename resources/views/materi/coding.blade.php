@@ -496,7 +496,82 @@
             levelId,
             evaluasiUrl
         } = window.MATERI_CTX;
-        const activeCoding = codingCatalog[levelId] || codingCatalog[1];
+        const seededCoding = window.MATERI_CTX.codingMaterial;
+        const activeCoding = seededCoding ? {
+            varPrefix: seededCoding.varPrefix,
+            defaultTestInput: seededCoding.defaultTestInput,
+            steps: {
+                step1: {
+                    label: seededCoding.step1_label,
+                    miniDesc: seededCoding.step1_miniDesc,
+                    hintTitle: seededCoding.step1_hintTitle,
+                    hintHtml: seededCoding.step1_hintHtml,
+                    sample: seededCoding.step1_sample,
+                    placeholder: seededCoding.step1_placeholder,
+                    tokens: seededCoding.step1_tokens,
+                    validate: value => new RegExp(seededCoding.step1_validate_regex, 'i').test(value.trim())
+                },
+                decision: {
+                    label: seededCoding.decision_label,
+                    miniDesc: seededCoding.decision_miniDesc,
+                    hintTitle: seededCoding.decision_hintTitle,
+                    hintHtml: seededCoding.decision_hintHtml,
+                    sample: seededCoding.decision_sample,
+                    placeholder: seededCoding.decision_placeholder,
+                    tokens: seededCoding.decision_tokens,
+                    validate: value => new RegExp(seededCoding.decision_validate_regex, 'i').test(value.trim())
+                },
+                branchYes: {
+                    label: seededCoding.branchYes_label,
+                    miniDesc: seededCoding.branchYes_miniDesc,
+                    hintTitle: seededCoding.branchYes_hintTitle,
+                    hintHtml: seededCoding.branchYes_hintHtml,
+                    sample: seededCoding.branchYes_sample,
+                    placeholder: seededCoding.branchYes_placeholder,
+                    tokens: seededCoding.branchYes_tokens,
+                    validate: value => new RegExp(seededCoding.branchYes_validate_regex, 'i').test(value.trim())
+                },
+                branchNo: {
+                    label: seededCoding.branchNo_label,
+                    miniDesc: seededCoding.branchNo_miniDesc,
+                    hintTitle: seededCoding.branchNo_hintTitle,
+                    hintHtml: seededCoding.branchNo_hintHtml,
+                    sample: seededCoding.branchNo_sample,
+                    placeholder: seededCoding.branchNo_placeholder,
+                    tokens: seededCoding.branchNo_tokens,
+                    validate: value => new RegExp(seededCoding.branchNo_validate_regex, 'i').test(value.trim())
+                }
+            },
+            evaluateOutput: value => {
+                const operand = seededCoding.outputRule.operand;
+                const numericValue = Number(value);
+                let conditionIsMet;
+
+                switch (seededCoding.outputRule.operator) {
+                    case 'modulo-zero':
+                        conditionIsMet = numericValue % operand === 0;
+                        break;
+                    case '>=':
+                        conditionIsMet = numericValue >= operand;
+                        break;
+                    case '<=':
+                        conditionIsMet = numericValue <= operand;
+                        break;
+                    case '>':
+                        conditionIsMet = numericValue > operand;
+                        break;
+                    case '<':
+                        conditionIsMet = numericValue < operand;
+                        break;
+                    default:
+                        throw new Error('Kondisi coding demo tidak dikenali.');
+                }
+
+                return conditionIsMet
+                    ? seededCoding.expected_output_yes
+                    : seededCoding.expected_output_no;
+            }
+        } : (codingCatalog[levelId] || codingCatalog[1]);
         const stepOrder = ['step1', 'decision', 'branchYes', 'branchNo'];
         let activeStepKey = 'step1';
 
